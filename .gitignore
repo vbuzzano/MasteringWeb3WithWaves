@@ -1,0 +1,30 @@
+package-lock.json
+
+### dependencies
+bower_components
+node_modules/
+jspm_packages/
+
+### log
+npm-debug.log*
+logs
+*.log
+
+### env
+.env
+.env.test
+.env*.local
+.eslintcache
+.vscode-test
+
+## temp
+tmp/
+temp/
+
+### react ###
+.DS_*
+**/*.backup.*
+**/*.back.*
+
+### dist ###
+# dist/

@@ -1,0 +1,28 @@
+version: "3"
+
+networks:
+
+  dev_network:
+    external:
+      name: dev_network
+
+services: 
+
+  app:
+    build: .
+    container_name: dev.web3waves
+    user: 1000:1000
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - /etc/sysctl.conf:/etc/sysctl.conf
+      - $STACK_DIR:/home/node/app
+    networks:
+      dev_network:
+        ipv4_address: 192.168.92.201
+    ports: 
+      - 3081:3000
+    #command: ["sleep","infinity"]
+    #depends_on: 
+    #  - mongo
