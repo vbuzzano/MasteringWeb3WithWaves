@@ -27,7 +27,7 @@ temp/
 **/*.back.*
 
 ### dist ###
-# dist/
+dist/
 
 ### ssh
 .ssh
