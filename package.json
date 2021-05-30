@@ -1,18 +1,24 @@
 {
-    "name": "mweb3-demo-waves",
+    "name": "vbuzzano-web3waves",
     "version": "0.1.0",
     "scripts": {
         "build": "webpack",
         "watch": "webpack --watch"
     },
     "dependencies": {
+        "@babel/polyfill": "^7.12.1",
         "@babel/preset-env": "^7.1.0",
         "@babel/preset-react": "^7.0.0",
+        "@waves.exchange/provider-cloud": "^1.0.2",
+        "@waves.exchange/provider-web": "^1.0.2",
+        "@waves/provider-seed": "^0.1.1",
+        "@waves/signer": "^1.0.2",
+        "@waves/waves-transactions": "^4.1.9-beta.5",
         "babel": "^6.23.0",
         "babel-core": "^6.26.3",
+        "express": "^4.16.4",
         "react": "^16.5.2",
-        "react-dom": "^16.5.2",
-        "express": "^4.16.4"
+        "react-dom": "^16.5.2"
     },
     "devDependencies": {
         "@babel/core": "^7.1.2",

@@ -1,9 +1,19 @@
-module.exports = {
+const path = require('path');
+
+const main = (name, minimize) => ({
 	entry: [
+		'@babel/polyfill',
 		'./src/main.js'
 	],
+    mode: "production",
+    optimization: {
+        minimize,
+        usedExports: true
+    },
 	output: {
-		filename: 'build.js'
+        globalObject: "this",
+        filename: name,
+        path: path.resolve(__dirname, 'dist'),
 	},
 	module: {
 		rules: [
@@ -16,4 +26,15 @@ module.exports = {
             }
 		]
 	}
-}
+})
+
+module.exports = [
+    {
+        ...main('build.js', false),
+        devtool: 'inline-source-map',
+        mode: "development",
+    },
+    {
+        ...main('build.min.js', true)
+    }
+]
