@@ -12,7 +12,7 @@ class App extends React.Component {
         if (typeof Waves !== 'undefined') {
             WavesKeeper.auth( authData )
             .then(auth => {
-                console.log( auth )
+                console.log( JSON.stringify(auth) )
             }).catch(err => {
                 console.error( err )
             })
