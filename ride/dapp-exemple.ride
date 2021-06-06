@@ -5,8 +5,8 @@
 @Callable(i)
 func purchase() = {
     let pmt = extract(i.payment)  # creating variable with all data about a payment attached to the invokation
-   if (isDefined(pmt.assetId)) then throw("can hodl waves only at the moment")  # waves-only threshold
-   else {
+    if (isDefined(pmt.assetId)) then throw("can hodl waves only at the moment")  # waves-only threshold
+    else {
         let customerAddress = i.caller.bytes.toBase58String()
         let price = match this.getInteger("item_A_coupon_price") {  # reading coupon price
         case a:Int => a
@@ -15,13 +15,12 @@ func purchase() = {
         if (pmt.amount < price) then throw("Purchase amount cannot be less than item price")
         else {
             WriteSet([
-                DataEntry("status:purchase_A_item_A_customer_" + customerAddress, "confirmed")
+                DataEntry("status:purchase_A_item_A_customer_" + customerAddress, "confirmed"),
                 DataEntry("price:purchase_A_item_A_customer_" + customerAddress, price)
             ])
         }
    }
 }
-
 
 #@Verifier(tx)
 #func standardVerifier() = sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
