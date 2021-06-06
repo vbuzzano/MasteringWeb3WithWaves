@@ -1,6 +1,3 @@
-const accountCooperAddr = '3P....'
-const accountAliceSeed = 'seed phrase'
-
 it('Verifier test 1', async function(){
 
     const ttx = transfer({ 
