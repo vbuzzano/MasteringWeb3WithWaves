@@ -1,4 +1,5 @@
 package-lock.json
+*.code-workspace
 
 ### dependencies
 bower_components
