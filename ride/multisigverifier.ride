@@ -7,9 +7,7 @@ func verify() = {
     match(tx) {
         case d:DataTransaction => true
         case s:SetScriptTransaction =>
-            sigVerify(tx.bodyBytes, tx.proofs[0], tx.
-            senderPublicKey)
-        }
+            sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
         case _ => false
     }
 }
