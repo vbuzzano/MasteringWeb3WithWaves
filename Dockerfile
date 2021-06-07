@@ -16,6 +16,16 @@ RUN ssh-keygen -A && \
 RUN echo "node ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 RUN echo "alias ll='ls -lhas'" >> /home/node/.bashrc
 
+RUN npm i -g \
+    @waves/surfboard@beta \
+    @babel/core \
+    @babel/runtime-corejs2 \
+    babel-loader \
+    babel-preset-es2015 \
+    cross-env \
+    webpack \
+    webpack-cli
+
 EXPOSE 3000
 EXPOSE 22
 
