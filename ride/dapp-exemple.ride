@@ -29,3 +29,11 @@ func purchase(itemKey: String) = {
         }
     }
 }
+
+@Verifier(tx)
+func verify() = {
+    match (tx) {
+        case t:SetScriptTransaction => sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
+        case _ => false
+    }
+}
