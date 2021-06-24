@@ -1,0 +1,20 @@
+{-# STDLIB_VERSION 4 #-}
+{-# CONTENT_TYPE EXPRESSION #-}
+{-# SCRIPT_TYPE ASSET #-}
+
+
+let expireTimestamp = 1640995200 # 2022-01-01 00:00:00
+
+let isTrxEnabled = expireTimestamp > lastBlock.timestamp 
+let isIssuer = this.issuer == tx.sender
+
+match tx {
+    case t: ExchangeTransaction => {
+           t.buyOrder.assetPair.priceAsset == unit 
+        && t.buyOrder.assetPair.priceAsset == unit
+        && isTrxEnabled
+    }
+    case t:ReissueTransaction  => isIssuer && isTrxEnabled
+    case t:BurnTransaction => isIssuer && isTrxEnabled
+    case _ => isTrxEnabled
+}
