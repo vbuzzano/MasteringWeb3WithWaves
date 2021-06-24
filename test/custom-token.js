@@ -83,15 +83,17 @@ describe('Week 5 - Task 1', () => {
     })
 
     it('Re Transfer 50 tokens to any address Should failed', async () => {
-        const ttx = transfer({
-            amount: 50,
-            assetId,
-            fee: 0.005 * wvs,
-            recipient: address(accounts.bob),
-        }, accounts.issuer)
-        const tx = await broadcast(ttx)
-        await waitForTx(tx.id)
-
-        console.log(`Transfer successfull : ${tx.id}`)
+        try {
+            const ttx = transfer({
+                amount: 50,
+                assetId,
+                fee: 0.005 * wvs,
+                recipient: address(accounts.bob),
+            }, accounts.issuer)
+            const tx = await broadcast(ttx)
+            await waitForTx(tx.id)
+        } catch (error) {
+            console.log(`Transaction failed: ${error.message}`)
+        }
     })
 })
