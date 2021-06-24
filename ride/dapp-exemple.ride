@@ -16,7 +16,7 @@ func purchase(itemKey: String) = {
         else {
             let customerAddress = i.caller.bytes.toBase58String()
             let price = match this.getInteger("item_A_" + itemKey + "_price") {  # reading coupon price
-            case a:Int => a
+                case a:Int => a
                 case _ => throw("Coupon ' " + itemKey + " ' does not exists, please choose an existing coupon to purchase.")
             }
             if (pmt.amount < price) then throw("Purchase amount cannot be less than item price")

@@ -9,18 +9,30 @@
 
 /* global before,setupAccounts, accounts,
    broadcast, waitForTx, issue, reissue,
+   file, compile, setScript, invokeScript,
    setAssetScript, transfer, address */
 /* eslint no-undef: "error" */
 
 const wvs = 1e8
+let assetId = null
 
-describe('Week 5 - Task 1', () => {
+describe('Week 5 - Task 1 & 2', () => {
     before(async () => {
-        await setupAccounts({ issuer: 3.1 * wvs, bob: 0.01 * wvs })
-        console.log(`Seed for account issuer is ${accounts.issuer}`)
-    })
+        await setupAccounts({
+            dApp: 1 * wvs,
+            issuer: 3.1 * wvs,
+            bob: 0.1 * wvs,
+        })
 
-    let assetId = null
+        const script = compile(file('custom-wallet.ride'))
+        const ssTx = setScript({ script }, accounts.dApp)
+        const tx = await broadcast(ssTx)
+        await waitForTx(tx.id)
+
+        console.log(`dApp account ${address(accounts.dApp)}`)
+        console.log(`Issuer account ${address(accounts.issuer)}`)
+        console.log(`Bob account ${address(accounts.bob)}`)
+    })
 
     it('Issue usual token', async () => {
         const params = {
@@ -95,5 +107,22 @@ describe('Week 5 - Task 1', () => {
         } catch (error) {
             console.log(`Transaction failed: ${error.message}`)
         }
+    })
+
+    it('Wallet Deposit ', async () => {
+        const params = {
+            dApp: address(accounts.dApp),
+            call: {
+                function: 'deposit',
+            },
+            payment: [{
+                amount: 10, assetId: 0342,
+            }],
+            fee: 0.009 * wvs,
+        }
+        const stx = invokeScript(params, accounts.bob)
+        const tx = await broadcast(stx)
+        await waitForTx(tx.id)
+        console.log(`Deposit done -> ${tx.id}`)
     })
 })

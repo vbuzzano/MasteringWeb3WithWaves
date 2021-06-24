@@ -1,0 +1,89 @@
+{-# STDLIB_VERSION 3 #-}
+{-# CONTENT_TYPE DAPP #-}
+{-# SCRIPT_TYPE ACCOUNT #-}
+
+let NONE = "none"
+let NATIVE = "native"
+
+func getStringByKey(key: String) = { 
+    match getString(this, key) {
+        case a: String => a
+        case _ => NONE
+    }
+}
+func getIntegerByKey( key: String ) = {
+    match getInteger( this, key ) {
+        case a: Int => a
+        case _ => 0
+    }
+}
+
+func assetAsString( assetId: String|ByteVector|Unit ) = 
+    match(assetId) {
+        case a: ByteVector => toBase58String(a)
+        case a: String => a 
+        case _ => NATIVE
+    }
+
+
+func getVault( account: String, assetId: ByteVector|String|Unit ) =
+    "vault_" + toBase58String(sha256(toBytes( 
+        account + "_" + assetAsString(assetId) 
+    )))
+
+func keyVaultAccount( vault: String ) = vault + "_account"
+func keyVaultAssetId( vault: String ) = vault + "_asset"
+func keyVaultAmount( vault: String ) = vault + "_amount"
+
+func getVaultAccount( vault: String ) = 
+    getStringByKey(keyVaultAccount(vault))
+
+func getVaultAssetId( vault: String ) = 
+    getStringByKey(keyVaultAssetId(vault))
+
+func getVaultAmount( vault: String ) = 
+    getIntegerByKey(keyVaultAmount(vault))
+
+
+func getAccount( i: Invocation ) = 
+    toBase58String(i.caller.bytes)
+
+@Callable( i )
+func deposit() = {
+    let account = getAccount( i )
+    let pmt = extract( i.payment )
+    let asset = assetAsString(pmt.assetId)
+    let vault = getVault( account, asset )
+    let currentAmt = getVaultAmount( vault )
+    let amount = currentAmt + pmt.amount
+    if ( pmt.amount <= 0 ) then throw( "Only positive amounts are accepted" )
+    else WriteSet([
+        DataEntry( keyVaultAccount( vault ), account ),
+        DataEntry( keyVaultAssetId( vault ), asset ),
+        DataEntry( keyVaultAmount( vault ), amount)
+    ])
+}
+
+@Callable(i)
+func withdraw( amount: Int, assetId: ByteVector) = {
+    let account = getAccount( i )
+    let vault = getVault( account, assetId )
+    let vaultAmt = getVaultAmount( vault )
+    let newAmt = vaultAmt - amount
+    if ( amount <= 0 ) then throw( "Wrong amount" )
+    else if (vaultAmt == 0 ) then throw( "No liquidity" )
+    else if ( newAmt < 0 ) then 
+        throw( "Not enough balance, maximum is " + toString(vaultAmt) + " units" )
+    else ScriptResult(
+        WriteSet([ 
+            DataEntry( keyVaultAmount( vault ), newAmt )
+        ]),
+        TransferSet([
+            ScriptTransfer( i.caller, amount, assetId )
+        ])
+    )
+}
+
+# this script can NOT be updated because of this verifier function
+@Verifier(tx)
+func verify() = false
