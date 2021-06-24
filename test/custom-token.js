@@ -19,12 +19,12 @@ let assetId = null
 describe('Week 5 - Task 1 & 2', () => {
     before(async () => {
         await setupAccounts({
-            dApp: 1 * wvs,
+            dApp: 0.03 * wvs,
             issuer: 3.1 * wvs,
-            bob: 0.1 * wvs,
+            bob: 0.03 * wvs,
         })
 
-        const script = compile(file('custom-wallet.ride'))
+        const script = compile(file('vault.ride'))
         const ssTx = setScript({ script }, accounts.dApp)
         const tx = await broadcast(ssTx)
         await waitForTx(tx.id)
@@ -78,7 +78,7 @@ describe('Week 5 - Task 1 & 2', () => {
         const tx = await broadcast(ttx)
         await waitForTx(tx.id)
 
-        console.log(`Transfer successfull : ${tx.id}`)
+        console.log(`Transfer successful : ${tx.id}`)
     })
 
     it('Update asset script to allow only InvokeScript transactions with the token and deny all others', async () => {
@@ -116,11 +116,13 @@ describe('Week 5 - Task 1 & 2', () => {
                 function: 'deposit',
             },
             payment: [{
-                amount: 10, assetId: 0342,
+                amount: 10, assetId,
             }],
-            fee: 0.009 * wvs,
+            fee: 900000,
         }
+        console.log('AAAAAAA')
         const stx = invokeScript(params, accounts.bob)
+        console.log(stx)
         const tx = await broadcast(stx)
         await waitForTx(tx.id)
         console.log(`Deposit done -> ${tx.id}`)

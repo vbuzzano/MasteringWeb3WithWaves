@@ -6,13 +6,13 @@
 /* eslint no-undef: "error" */
 /* eslint-disable prefer-destructuring */
 
-const wvs = 10 ** 8
+const wvs = qty => parseInt(qty * 1e8)
 
 describe('Custom Wallet', async () => {
     before(async () => {
         await setupAccounts({
-            dApp: 0.5 * wvs,
-            alice: 0.5 * wvs,
+            dApp: wvs(0.5),
+            alice: wvs(0.5),
         })
 
         const script = compile(file('vault.ride'))
