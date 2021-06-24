@@ -15,7 +15,7 @@ describe('Custom Wallet', async () => {
             alice: 0.5 * wvs,
         })
 
-        const script = compile(file('custom-wallet.ride'))
+        const script = compile(file('vault.ride'))
         const ssTx = setScript({ script }, accounts.dApp)
         await broadcast(ssTx)
         await waitForTx(ssTx.id)
