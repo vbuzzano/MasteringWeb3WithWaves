@@ -1,4 +1,4 @@
-{-# STDLIB_VERSION 3 #-}
+{-# STDLIB_VERSION 4 #-}
 {-# CONTENT_TYPE DAPP #-}
 {-# SCRIPT_TYPE ACCOUNT #-}
 
@@ -11,6 +11,10 @@ let DELISTED = "delisted"
 
 let VOTING = "voting"
 let REVEAL = "reveal"
+
+let APPROVAL = "approval"
+let REJECTED = "rejected"
+let ACCEPTED = "accepted"
 
 func getStringByKey(key: String) = { 
     match getString(this, key) {
@@ -26,16 +30,27 @@ func getIntegerByKey(key: String) = {
     }
 }
 
+func getBooleanByKey(key: String) = {
+    match getBoolean(this, key) {
+        case a: Boolean => a
+        case _ => false
+    }
+}
+
 func getKeySupplierAccount(account: String) = account + "_account"
 func getSupplierAccount(account: String) = getStringByKey(getKeySupplierAccount(account))
 
 func getKeyItem(supplier: String, title: String) = { 
     let supplierTitle = supplier + title
     "item_" + supplierTitle.toBytes().sha256().toBase58String()
- }
+}
 func getKeyItemSupplier(item: String) = item + "_owner"
+func getKeyItemTitle(item: String) = item + "_title"
 func getKeyItemPrice(item: String) = item + "_price"
 func getKeyItemData(item: String) = item + "_data"
+func getKeyItemExpireDate(item: String) = item + "_expiredate"
+func getKeyItemSoldCounter(item: String) = item + "_sold"
+func getKeyItemRemoved(item: String) = item + "_removed"
 
 func getKeyCommit(item: String, user: String) = item + "_" + user + "_commit"
 func getKeyCommitsCount(item: String) = item + "_cmtcnt"
@@ -43,34 +58,80 @@ func getKeyReveal(item: String, user: String) = item + "_" + user + "_reveal"
 func getKeyItemStatus(item: String) = item + "_status"
 func getKeyVotesCount(item: String, vote: String) = item + "_res:" + vote
 
-func getKeyUserItemCounter(user: String, item: String) = item + "_" + user + "_cnt"
+func getKeySupplierBalance(supplier: String) = supplier + "_balance"
+func getKeySupplierAvailableBalance(supplier: String) = supplier + "_available"
+func getKeyUserItemCounter(user: String, item: String) = user + "_" + item + "_counter"
 
-func getKeyBalanceSupplier(account: String) = account + "_balance"
+func genPurchaseKey(supplier: String, item: String, user: String, counter: Int) = 
+    "purchase_" + toBase58String(sha256(toBytes(supplier + "_" + item + "_" + user + "_" + toString(counter))))
+func getKeyPurchaseStatus(purchase: String) = purchase + "_status"
+func getKeyPurchaseItem(purchase: String) = purchase + "_item"
+func getKeyPurchaseSupplier(purchase: String) = purchase + "_supplier"
+func getKeyPurchaseUser(purchase: String) = purchase + "_user"
+func getKeyPurchaseAmount(purchase: String) = purchase + "_amount"
+func getKeyPurchaseTimestamp(purchase: String) = purchase + "_timestamp"
+func getKeyPurchaseAssetId(purchase: String) = purchase + "_assetId"
+func getKeyPurchaseFundPaid(purchase: String) ="purchase_" + purchase + "_fundpaid"
 
-func getValueBalanceSupplier(account: String) = {
-    let supplierBalanceKey = getKeyBalanceSupplier(account)
-    match getInteger(this, supplierBalanceKey) {
-        case a: Int => a
-        case _ => 0
-    }
-}
+func getKeyCouponPurchase(assetId: String) ="coupon_" + assetId + "_purchase"
+func getKeyCouponItem(assetId: String) ="coupon_" + assetId + "_item"
 
-func getValueUserItemCounter(user: String, item: String) = {
-    let userItemCounterKey = getKeyUserItemCounter(user, item)
-    match getInteger(this, userItemCounterKey) {
-        case a:Int => a
-        case _ => 0
-    }
-}
+# func getKeyCoupon(assetId: String) = "coupon_" + assetId
+# func getKeyCouponItem(coupon: String) = coupon + "_item"
 
-func getValueItemPrice(item: String) = {
-    let keyItemPrice = getKeyItemPrice(item)
-    getIntegerValue(this, keyItemPrice)
-}
+func getValueSupplierBalance(supplier: String) =
+    getIntegerByKey(getKeySupplierBalance(supplier))
 
-func getValueItemSupplier(account: String) = { 
-    getStringByKey(getKeyItemSupplier(account))
-}
+func getValueSupplierAvailableBalance(supplier: String) =
+    getIntegerByKey(getKeySupplierAvailableBalance(supplier))
+
+func getValueUserItemCounter(user: String, item: String) =
+    getIntegerByKey(getKeyUserItemCounter(user, item))
+
+func getValuePurchaseStatus(purchase: String) =
+    getStringByKey(getKeyPurchaseStatus(purchase))
+
+func getValuePurchaseItem(purchase: String) =
+    getStringValue(this, getKeyPurchaseItem(purchase))
+
+func getValuePurchaseSupplier(purchase: String) =
+    getStringValue(this, getKeyPurchaseSupplier(purchase))
+
+func getValuePurchaseUser(purchase: String) =
+    getStringValue(this, getKeyPurchaseUser(purchase))
+
+func getValuePurchaseAmount(purchase: String) =
+    getIntegerValue(this, getKeyPurchaseAmount(purchase))
+
+func getValuePurchaseTimestamp(purchase: String) =
+    getIntegerByKey(getKeyPurchaseTimestamp(purchase))
+
+func getValuePurchaseAssetId(purchase: String) =
+    getStringByKey(getKeyPurchaseAssetId(purchase))
+
+func getValuePurchaseFundPaid(purchase: String) =
+    getBooleanByKey(getKeyPurchaseFundPaid(purchase))
+
+func getValueItemPrice(item: String) =
+    getIntegerValue(this, getKeyItemPrice(item))
+
+func getValueItemSupplier(item: String) =
+    getStringByKey(getKeyItemSupplier(item))
+
+func getValueItemExpireTime(item: String) =
+    getIntegerByKey(getKeyItemExpireDate(item))
+
+func getValueItemTitle(item: String) =
+    getStringByKey(getKeyItemTitle(item))
+
+func getValueItemSoldCounter(item: String) =
+    getIntegerByKey(getKeyItemSoldCounter(item))
+
+func getValueItemRemoved(item: String) = 
+    getBooleanByKey(getKeyItemRemoved(item))
+
+func getValueCouponPurchase(assetId: String) =
+    getStringByKey(getKeyCouponPurchase(assetId))
 
 func getValueCommit(item: String, user: String) = getStringByKey(getKeyCommit(item, user))
 func getValueCommitsCount(item: String) = getIntegerByKey(getKeyCommitsCount(item))
@@ -86,58 +147,280 @@ func getValueVotesCount(item: String, vote: String) = getIntegerByKey(getKeyVote
 
 @Callable(i)
 func registerSupplier(data: String) = { 
-    let supplierAddress = i.caller.bytes.toBase58String()
-    let account = getSupplierAccount(supplierAddress)
+    let supplier = i.caller.bytes.toBase58String()
+    let account = getSupplierAccount(supplier)
     if (account != NONE) then throw("This address has already registred as supplier")
     else {
-        WriteSet([
-            DataEntry(getKeySupplierAccount(supplierAddress), data)
-        ])
+        [ StringEntry(getKeySupplierAccount(supplier), data) ]
     }
 }
 
 @Callable(i)
-func addItem(title: String, price: Int, data: String) = { 
-    let supplierAddress = i.caller.bytes.toBase58String()
-    let account = getSupplierAccount(supplierAddress)
-    let item = getKeyItem(supplierAddress, title)
+func addItem(title: String, price: Int, data: String, expire: Int) = { 
+    let supplier = i.caller.bytes.toBase58String()
+    let account = getSupplierAccount(supplier)
+    let item = getKeyItem(supplier, title)
 
     if (account == NONE) then throw("You should register as supplier to add an item")
     else if (price <= 0) then throw("Purchase amount cannot be less than item price")
     else if (getValueItemSupplier(item) != NONE) then throw("An item already exists")
     else {
-        WriteSet([
-            DataEntry(getKeyItemSupplier(item), supplierAddress),
-            DataEntry(getKeyItemPrice(item), price),
-            DataEntry(getKeyItemData(item), data)
-        ])
+        [
+            StringEntry(getKeyItemSupplier(item), supplier),
+            StringEntry(getKeyItemTitle(item), title),
+            IntegerEntry(getKeyItemPrice(item), price),
+            StringEntry(getKeyItemData(item), data),
+            IntegerEntry(getKeyItemExpireDate(item), expire)
+        ]
+    }
+}
+
+@Callable(i)
+func updateItem(item: String, title: String, price: Int, data: String, expire: Int) = { 
+    let supplier = i.caller.bytes.toBase58String()
+    let account = getSupplierAccount(supplier)
+    let itemSupplier = getValueItemSupplier(item)
+    let notFound = getValueItemTitle(item) == NONE || getValueItemRemoved(item) == true
+    if (account == NONE) then throw("You should register as supplier to remove an item")
+    else if (notFound) then throw("Item does not exists or has been removed " + item)
+    else if (supplier != itemSupplier) then throw("You don't owned item " + item)
+    else {
+        [
+            StringEntry(getKeyItemTitle(item), title),
+            IntegerEntry(getKeyItemPrice(item), price),
+            StringEntry(getKeyItemData(item), data),
+            IntegerEntry(getKeyItemExpireDate(item), expire)
+        ]
+    }
+}
+
+@Callable(i)
+func removeItem(item: String) = { 
+    let supplier = i.caller.bytes.toBase58String()
+    let account = getSupplierAccount(supplier)
+    let itemSupplier = getValueItemSupplier(item)
+    let notFound = getValueItemTitle(item) == NONE || getValueItemRemoved(item) == true
+    if (account == NONE) then throw("You should register as supplier to remove an item")
+    else if (notFound) then throw("Item does not exists or has been removed " + item)
+    else if (supplier != itemSupplier) then throw("You don't owned item " + item)
+    else {
+        let soldCounter = getValueItemSoldCounter(item)
+        if (soldCounter == 0) then [
+            DeleteEntry(getKeyItemSupplier(item)),
+            DeleteEntry(getKeyItemTitle(item)),
+            DeleteEntry(getKeyItemPrice(item)),
+            DeleteEntry(getKeyItemData(item)),
+            DeleteEntry(getKeyItemExpireDate(item))
+        ] else [
+            BooleanEntry(getKeyItemRemoved(item), true)
+        ]
     }
 }
 
 @Callable(i)
 func purchase(item: String) = {
-    let pmt = extract(i.payment)
-    if (isDefined(pmt.assetId)) then throw("You can buy tokens only with Waves tokens")
+    let pmt = i.payments[0]
+    let notFound = getValueItemTitle(item) == NONE || getValueItemRemoved(item) == true
+    if (notFound) then throw("Item does not exists or has been removed " + item)
+    else if (isDefined(pmt.assetId)) then throw("You can buy tokens only with Waves tokens")
     else {
-        let userAddress = i.caller.bytes.toBase58String()
+        let user = i.caller.bytes.toBase58String()
         let price = getValueItemPrice(item)
-        let supplierAddress = getValueItemSupplier(item)
+        let supplier = getValueItemSupplier(item)
+        let expire = getValueItemExpireTime(item)
 
-        if (pmt.amount < price) then throw("Purchase amount cannot be less than item price")
+        if (expire > 0 && expire <= lastBlock.timestamp) then throw("Coupon expired")
+        else if (pmt.amount < price) then throw("Purchase amount cannot be less than item price")
         else if (pmt.amount > price) then throw("Purchase amount cannot be higher than item price")
-        else if (supplierAddress == NONE) then throw("Supplier does not exists")
+        else if (supplier == NONE) then throw("Supplier does not exists")
         else {
-            let userItemCounter = getKeyUserItemCounter(userAddress, item)
-            let newValueUserItemCounter = getValueUserItemCounter(userAddress, item) + 1
+            let keyUserItemCounter = getKeyUserItemCounter(user, item)
+            let userItemCounter = getValueUserItemCounter(user, item) + 1
+            let purchase = genPurchaseKey(supplier, item, user, userItemCounter)
 
-            let supplierBalanceKey = getKeyBalanceSupplier(supplierAddress)
-            let newSupplierBalance = getValueBalanceSupplier(supplierAddress) + pmt.amount
-
-            WriteSet([
-                DataEntry(userItemCounter, newValueUserItemCounter),
-                DataEntry(supplierBalanceKey, newSupplierBalance)
-            ])
+            let keyPurchaseStatus = getKeyPurchaseStatus(purchase)
+            let keyPurchaseItem = getKeyPurchaseItem(purchase)
+            let keyPurchaseSupplier = getKeyPurchaseSupplier(purchase)
+            let keyPurchaseUser = getKeyPurchaseUser(purchase)
+            let keyPurchaseAmount = getKeyPurchaseAmount(purchase)
+            let keyPurchaseTimestamp = getKeyPurchaseTimestamp(purchase)
+            [
+                IntegerEntry(keyUserItemCounter, userItemCounter),
+                StringEntry(keyPurchaseStatus, APPROVAL),
+                StringEntry(keyPurchaseItem, item),
+                StringEntry(keyPurchaseSupplier, supplier),
+                StringEntry(keyPurchaseUser, user),
+                IntegerEntry(keyPurchaseAmount, pmt.amount),
+                IntegerEntry(keyPurchaseTimestamp, lastBlock.timestamp)
+#                ScriptTransfer(i.caller, 1, assetId.fromBase58String())
+            ]
         }
+    }
+}
+
+@Callable(i)
+func rejectPurchase(purchase: String) = {
+    let caller = i.caller.bytes.toBase58String()
+    let status = getValuePurchaseStatus(purchase)
+    let supplier = getValuePurchaseSupplier(purchase)
+    let item = getValuePurchaseItem(purchase)
+    let notFound = item == NONE
+    if (notFound) then throw("Purchase not found " + purchase)
+    else if (supplier == NONE || caller != supplier) then throw("Your are not the owner of this item")
+    else if (status != APPROVAL) then throw("You cannot reject this purchased")
+    else {
+        let keyPurchaseStatus = getKeyPurchaseStatus(purchase)
+        let keyPurchaseAmount = getKeyPurchaseAmount(purchase)
+        let keySupplierBalance = getKeySupplierBalance(supplier)
+        let keyItemSoldCounter = getKeyItemSoldCounter(item)
+        let user = getValuePurchaseUser(purchase)
+        let amount = getValuePurchaseAmount(purchase)
+        let supplierBalance = getValueSupplierBalance(supplier) - amount
+        let itemSoldCounter = getValueItemSoldCounter(item) - 1
+
+        let address = addressFromStringValue(user)
+        [
+            StringEntry(keyPurchaseStatus, REJECTED),
+            IntegerEntry(keyPurchaseAmount, 0),
+            ScriptTransfer(address, amount, unit)
+        ]
+    }
+}
+
+@Callable(i)
+ func acceptPurchase(purchase: String, couponAssetId: String) = {
+    let caller = toBase58String(i.caller.bytes)
+    let status = getValuePurchaseStatus(purchase)
+    let supplier = getValuePurchaseSupplier(purchase)
+    let item = getValuePurchaseItem(purchase)
+    let expire = getValueItemExpireTime(item)
+    let notFound = item == NONE
+    if (notFound) then throw("Purchase not found " + purchase)
+    else if (supplier == NONE || caller != supplier) then throw("Your are not the owner of this item")
+    else if (status != APPROVAL) then throw("You cannot reject this purchased")
+    else if (expire > 0 && expire <= lastBlock.timestamp) then throw("Coupon expired")
+    else {
+        let keyPurchaseStatus = getKeyPurchaseStatus(purchase)
+        let keyPurchaseAssetId = getKeyPurchaseAssetId(purchase)
+        let keySupplierBalance = getKeySupplierBalance(supplier)
+        let keyItemSoldCounter = getKeyItemSoldCounter(item)
+        let keyCouponPurchase = getKeyCouponPurchase(couponAssetId)
+        let keyCouponItem = getKeyCouponItem(couponAssetId)
+
+        let amount = getValuePurchaseAmount(purchase)
+        let supplierBalance = getValueSupplierBalance(supplier) + amount
+        let itemSoldCounter = getValueItemSoldCounter(item) + 1
+
+        # # Issue Coupon and link it with item
+        # let title = getValueItemTitle(item)
+        # let description = "{\"item\": \"" + item + "\"}"
+        # let script = base64:'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IGl0ZW0gBQAAAARpdGVtAgAAAAogbm90IGZvdW5kAwUAAAAJaXNFeHBpcmVkBAAAAAckbWF0Y2gwBQAAAAJ0eAMJAAABAAAAAgUAAAAHJG1hdGNoMAIAAAAZU2V0QXNzZXRTY3JpcHRUcmFuc2FjdGlvbgQAAAABZQUAAAAHJG1hdGNoMAkBAAAAF2NoZWNrQW5kQWNjZXB0U2V0U2NyaXB0AAAAAQUAAAABZQMJAAABAAAAAgUAAAAHJG1hdGNoMAIAAAAPQnVyblRyYW5zYWN0aW9uBAAAAAFlBQAAAAckbWF0Y2gwBgkAAAIAAAABAgAAAExUaGlzIGNvdXBvbiBoYXMgZXhwaXJlZCBhbmQgY2FuIG9ubHkgYmUgYnVybmVkIHRvIHJlbW92ZSBpdCBmcm9tIHlvdXIgd2FsbGV0BAAAAAckbWF0Y2gwBQAAAAJ0eAMJAAABAAAAAgUAAAAHJG1hdGNoMAIAAAAZU2V0QXNzZXRTY3JpcHRUcmFuc2FjdGlvbgQAAAABZQUAAAAHJG1hdGNoMAkBAAAAF2NoZWNrQW5kQWNjZXB0U2V0U2NyaXB0AAAAAQUAAAABZQMJAAABAAAAAgUAAAAHJG1hdGNoMAIAAAAPQnVyblRyYW5zYWN0aW9uBAAAAAFlBQAAAAckbWF0Y2gwCQEAAAASY2hlY2tBbmRBY2NlcHRCdXJuAAAAAQUAAAABZQMJAAABAAAAAgUAAAAHJG1hdGNoMAIAAAATVHJhbnNmZXJUcmFuc2FjdGlvbgQAAAABZQUAAAAHJG1hdGNoMAkBAAAAFmNoZWNrQW5kQWNjZXB0VHJhbnNmZXIAAAABBQAAAAFlAwkAAAAAAAACCAUAAAACdHgAAAAGc2VuZGVyCQAEJgAAAAEFAAAACHN1cHBsaWVyCQAAAgAAAAECAAAAV1RoaXMgY291cG9uIGNhbiBvbmx5IGJlIHVzZSB0byBzdXBwbGllciBpbiBhbiBleGNoYW5nZSBvZiBnb29kIG9yIHNlcnZpY2Ugd2l0aCBkaXNjb3VudAkAAAIAAAABAgAAADJUaGlzIGNvdXBvbiBjYW4gYmUgYnVybmVkIHRvIGVuYWJsZSB3aXRoZHJhdyBmdW5kc3qfGeM='
+        # let asset = Issue(title, description, 1, 0, false, script)
+        # let assetId = asset.calculateAssetId()
+        # let coupon = getKeyCoupon(assetId.toBase58String())
+        # let coupon = getKeyCoupon(assetId)
+
+        let user = getValuePurchaseUser(purchase)
+        let address = addressFromStringValue(user)
+        [
+              StringEntry(keyPurchaseStatus, ACCEPTED)
+            , StringEntry(keyCouponPurchase, purchase)
+            , StringEntry(keyCouponItem, item)
+            , StringEntry(keyPurchaseAssetId, couponAssetId)
+            , IntegerEntry(keySupplierBalance, supplierBalance)
+            , IntegerEntry(keyItemSoldCounter, itemSoldCounter)
+            # , ScriptTransfer(address, 1, fromBase58String(couponAssetId))
+        ]
+    }
+}
+
+@Callable(i)
+ func burn() = {
+    let caller = toBase58String(i.caller.bytes)
+    let pmt = if i.payments.size() == 1 then i.payments[0]
+        else throw("An attached coupon is required as payment[0]")
+
+    if (isDefined(pmt.assetId) == false) then throw("Need a coupon to burn")
+    else {
+        let assetId = match pmt.assetId {
+    	    case e: ByteVector => e
+			case _ => throw("Need a coupon to burn")
+		}
+        let asset = toBase58String(assetId)
+        let purchase = getValueCouponPurchase(asset)
+        let supplier = getValuePurchaseSupplier(purchase)
+        if (caller != supplier) then throw("Your are not the supplier for this coupon")
+        else {
+            let keySupplierAvailableBalance = getKeySupplierAvailableBalance(supplier)
+            let keyCouponFundPaid = getKeyPurchaseFundPaid(asset)
+            let amount = getValuePurchaseAmount(purchase)
+            let availableBalance = getValueSupplierAvailableBalance(supplier) + amount
+
+            [
+                  Burn(assetId, 1)
+                , BooleanEntry(keyCouponFundPaid, true)
+                , IntegerEntry(keySupplierAvailableBalance, availableBalance)
+            ]
+        }       
+    }
+}
+
+@Callable(i)
+ func withdrawAvailable() = {
+    let supplier = toBase58String(i.caller.bytes)
+    let account = getSupplierAccount(supplier)
+    if (account == NONE) then throw("You are not registred as supplier")
+    else {
+        let balance = getValueSupplierBalance(supplier)
+        let available = getValueSupplierAvailableBalance(supplier)
+        let amount = if (balance - available < 0) then 0 else available
+        if (amount == 0) then throw("Nothing to withdraw. You need to burn coupon to unlock balance")
+        else { 
+            let keySupplierBalance = getKeySupplierBalance(supplier)
+            let keySupplierAvailableBalance = getKeySupplierAvailableBalance(supplier)
+            let newBalance = balance - amount
+            [
+                  IntegerEntry(keySupplierBalance, newBalance)
+                , IntegerEntry(keySupplierAvailableBalance, 0)
+                , ScriptTransfer(i.caller, amount, unit)
+
+            ]
+        }       
+    }
+}
+
+@Callable(i)
+ func withdraw(assetId: String) = {
+    let caller = toBase58String(i.caller.bytes)
+    let account = getSupplierAccount(caller)
+    if (account == NONE) then throw("You are not registred as supplier")
+    else {
+        let purchase = getValueCouponPurchase(assetId)
+        let supplier = getValuePurchaseSupplier(purchase)
+        let isfundPaid = getValuePurchaseFundPaid(assetId)
+        if (caller != supplier) then throw("Your are not the supplier for this coupon")
+        else if (isfundPaid) then throw("Fund has already been paid")
+        else {
+            let item = getValuePurchaseItem(purchase)
+            let expire = getValueItemExpireTime(item)
+            let info = match assetInfo(fromBase58String(assetId)) {
+                case a:Asset => a
+                case _ => throw("Cannot find asset info")
+            }
+            let canWithdraw = if (expire > 0 && expire <= lastBlock.timestamp) then true 
+                else if (info.quantity == 0) then true
+                else false
+
+            if (!canWithdraw) then throw("This coupon cannot be funded")
+            else {
+                let keyCouponFundPaid = getKeyPurchaseFundPaid(assetId)
+                let amount = getValuePurchaseAmount(purchase)
+                [
+                      BooleanEntry(keyCouponFundPaid, true)
+                    , ScriptTransfer(i.caller, amount, unit)
+                ]
+            }
+        }       
     }
 }
 
@@ -154,11 +437,11 @@ func voteCommit(item: String, hash: String) = {
     else {
         let newStatus = if (commitsCount == VOTERS) then REVEAL else VOTING
         
-        WriteSet([
-            DataEntry(getKeyCommit(item, user), hash),
-            DataEntry(getKeyCommitsCount(item), commitsCount + 1),
-            DataEntry(getKeyItemStatus(item), newStatus)
-        ])
+        [
+            StringEntry(getKeyCommit(item, user), hash),
+            IntegerEntry(getKeyCommitsCount(item), commitsCount + 1),
+            StringEntry(getKeyItemStatus(item), newStatus)
+        ]
     }
 }
 
@@ -176,11 +459,11 @@ func voteReveal(item: String, vote: String, salt: String) = {
     else if (vote != FEATURED && vote != DELISTED) then throw("Provided voting option is incorrect")
     else {
         let newStatus = if (newVotesCount >= QUORUM) then vote else REVEAL
-        WriteSet([
-            DataEntry(getKeyReveal(item, user), vote),
-            DataEntry(getKeyVotesCount(item, user), newVotesCount),
-            DataEntry(getKeyItemStatus(item), newStatus)
-        ])
+        [
+            StringEntry(getKeyReveal(item, user), vote),
+            IntegerEntry(getKeyVotesCount(item, user), newVotesCount),
+            StringEntry(getKeyItemStatus(item), newStatus)
+        ]
     }
 }
 
@@ -188,6 +471,8 @@ func voteReveal(item: String, vote: String, salt: String) = {
 func verify() = {
     match (tx) {
         case t:SetScriptTransaction => sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
+        case t:IssueTransaction => sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
+        case t:TransferTransaction => sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
         case _ => false
     }
 }
