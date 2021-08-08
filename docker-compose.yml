@@ -24,6 +24,7 @@ services:
         ipv4_address: 192.168.92.201
     ports: 
       - 3081:3000
+      - 4001:4001
     #command: ["sleep","infinity"]
     #depends_on: 
     #  - mongo
