@@ -168,7 +168,6 @@ func voteReveal(item: String, vote: String, salt: String) = {
     let status = getValueItemStatus(item)
     let newVotesCount = getValueVotesCount(item, vote) + 1
     let saltedVote = (item + vote + salt).toBytes().sha256().toBase58String()
-
     if (saltedVote != getValueCommit(item, user)) then throw("Reveal data is not valid")
     else if (getValueCommitsCount(item) < VOTERS) then throw("Max number of voters not reached")
     else if (getValueReveal(item, user) != NONE) then throw("You voted already")

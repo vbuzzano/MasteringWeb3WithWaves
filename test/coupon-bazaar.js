@@ -6,6 +6,9 @@
 /* eslint no-undef: "error" */
 /* eslint-disable prefer-destructuring */
 
+const crypto = require('crypto')
+const bs58 = require('bs58')
+
 const wvs = 1e8
 
 const dataJson = {
@@ -27,14 +30,7 @@ const voteTypes = {
     featured: 'featured',
 }
 
-// item + vote + salt -> .toBytes().sha256().toBase58String()
-const commits = [
-    '3n9Rghb2fHXGwSYVz59aRXUKBHggY23qsWUAVybsFeMG',
-    'ESYw41NA4HwXh4cDE2XT6mzPikrQ6X7qJXtxb9iVyABg',
-    '82oVLMhsqBMyNeFvokdTw34vU4V3Q4Revuk15YtYfECP',
-]
-
-const reveals = [
+const votes = [
     voteTypes.delisted,
     voteTypes.featured,
     voteTypes.featured,
@@ -46,7 +42,20 @@ const salts = [
     'random2',
 ]
 
-let itemId = null // Auto set in the addItem test
+function bufferToArrayBuffer(buffer) {
+    var ab = new ArrayBuffer(buffer.length);
+    var view = new Uint8Array(ab);
+    for (var i = 0; i < buffer.length; ++i) {
+        view[i] = buffer[i];
+    }
+    return ab;
+}
+
+const toBytes = (text)  => Buffer.from(new TextEncoder().encode(text))
+const sha256 = (buffer) => crypto.createHash('sha256').update(buffer).digest()
+const toBase58String = (buffer)  => bs58.encode(buffer)
+
+const encodeVote = (item, vote, salt) => toBase58String(sha256(toBytes(item + vote + salt)))
 
 describe('Coupon Bazzar test suite', async () => {
     before(async () => {
@@ -122,35 +131,36 @@ describe('Coupon Bazzar test suite', async () => {
     })
 
     it('Vote commit', async () => {
-        const commitVote = async (vote, seed) => {
-            const ts = invokeScript({
+        const commitVote = async (item, vote, salt, seed) => {
+            const secret = encodeVote(item, vote, salt)
+            const tx = invokeScript({
                 dApp: address(accounts.dApp),
                 call: {
                     function: 'voteCommit',
                     args: [
-                        { type: 'string', value: itemId },
-                        { type: 'string', value: vote },
+                        { type: 'string', value: item },
+                        { type: 'string', value: secret },
                     ],
                 },
                 payment: [],
             }, seed)
-            const tx = await broadcast(ts)
+            await broadcast(tx)
             await waitForTx(tx.id)
         }
 
-        await commitVote(commits[0], accounts.user0)
-        await commitVote(commits[1], accounts.user1)
-        await commitVote(commits[2], accounts.user2)
+        await commitVote(itemId, votes[0], salts[0], accounts.user0)
+        await commitVote(itemId, votes[1], salts[1], accounts.user1)
+        await commitVote(itemId, votes[2], salts[2], accounts.user2)
     })
 
     it('Vote reveal', async () => {
-        const revealVote = async (vote, salt, seed) => {
+        const revealVote = async (item, vote, salt, seed) => {
             const ts = invokeScript({
                 dApp: address(accounts.dApp),
                 call: {
                     function: 'voteReveal',
                     args: [
-                        { type: 'string', value: itemId },
+                        { type: 'string', value: item },
                         { type: 'string', value: vote },
                         { type: 'string', value: salt },
                     ],
@@ -160,9 +170,9 @@ describe('Coupon Bazzar test suite', async () => {
             const tx = await broadcast(ts)
             await waitForTx(tx.id)
         }
-
-        await revealVote(reveals[0], salts[0], accounts.user0)
-        await revealVote(reveals[1], salts[1], accounts.user1)
-        await revealVote(reveals[2], salts[2], accounts.user2)
+        await revealVote(itemId, votes[0], salts[0], accounts.user0)
+        await revealVote(itemId, votes[1], salts[1], accounts.user1)
+        await revealVote(itemId, votes[2], salts[2], accounts.user2)
     })
 })
+
