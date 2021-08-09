@@ -18,9 +18,8 @@ const Coupons = ({
     const list = coupons || []
     if (loading) {
         return (
-            <div style={{ height: '100%', marginTop: '100px' }}>
+            <div className="text-center">
                 <div className="spinner-border text-primary" role="status">
-                                Loading...
                     <span className="sr-only">...</span>
                 </div>
             </div>

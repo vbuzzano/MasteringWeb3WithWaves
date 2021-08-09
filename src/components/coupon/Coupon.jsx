@@ -58,7 +58,6 @@ const Coupon = ({
             >
                 {name}
             </Text>
-            <Rating value="3" />
             <Text lineHeight="18px" fontWeight="200" pt="8px" fontSize="12px">
                 <LinesEllipsis
                     text={shortDescription}

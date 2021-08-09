@@ -3,10 +3,11 @@ import React, { useEffect, useState } from 'react'
 
 import { Flex, Modal } from '../../shared'
 import { Coupons } from '../../../containers'
-import { Dialog, Result } from '../../modal'
+import { Dialog, FormVote, Result } from '../../modal'
 import { useAppDialogs } from '../../service'
-import { subscribe, DATA } from '../../../libs/dApp'
-import { fetchItems, purchaseCoupon } from '../../../api'
+import {
+    subscribe, DATA, commitVote, fetchData, fetchItems, purchaseCoupon,
+} from '../../../libs/dApp'
 
 const PageMarket = ({
     account, setActiveUrl,
@@ -19,7 +20,10 @@ const PageMarket = ({
         result: [resultOpened, onResultOpen, onResultClose],
     } = useAppDialogs()
 
-    const { isConnected } = account
+    const {
+        form: [voteFormOpened, onVoteFormOpened, onVoteFormClose],
+        result: [voteResultOpened, onVoteResultOpen, onVoteResultClose],
+    } = useAppDialogs()
 
     const refreshItems = async () => {
         try {
@@ -33,7 +37,7 @@ const PageMarket = ({
         }
     }
 
-    useEffect(() => subscribe(DATA, refreshItems), [])
+    useEffect(() => subscribe(DATA, refreshItems), [account])
 
     return (
         <>
@@ -48,9 +52,10 @@ const PageMarket = ({
             </div>
             <Flex
                 justifyContent="center"
-                p={{
-                    0: '10px',
-                    md: '0px',
+                px={{
+                    0: '20px',
+                    lg: '39px',
+                    xl: '20px',
                 }}
                 flexWrap="wrap"
             >
@@ -64,7 +69,7 @@ const PageMarket = ({
 
             <Modal open={dialogOpened} onClose={onDialogClose}>
                 <Dialog
-                    buttons={isConnected ? ['buy'] : ['login']}
+                    buttons={['buy', 'vote']}
                     // activeUrl={activeUrl}
                     // manageMode={manageMode}
                     coupon={selectedItem}
@@ -73,7 +78,10 @@ const PageMarket = ({
                         await purchaseCoupon(selectedItem)
                         onDialogClose()
                         onResultOpen()
-                        //                                        await fetchData()
+                    }}
+                    onVote={async () => {
+                        onDialogClose()
+                        onVoteFormOpened()
                     }}
                 />
 
@@ -82,6 +90,40 @@ const PageMarket = ({
                 <Result
                     text="<div class='alert alert-success'>Thank you for your purchase.</div><div>The supplier will soon validate this transaction and you will receive your coupon as NFT</div>"
                     onClose={onResultClose}
+                />
+            </Modal>
+
+            <Modal
+                open={voteFormOpened}
+                onClose={onVoteFormClose}
+                width={{
+                    0: '100%',
+                    lg: 'initial',
+                }}
+                mx="10px"
+            >
+                <FormVote
+                    coupon={selectedItem}
+                    onClose={onVoteFormClose}
+                    onSubmit={async (data) => {
+                        setLoading(true)
+                        try {
+                            await commitVote(selectedItem.id, 'featured', data.salt)
+                            onVoteFormClose()
+                            onVoteResultOpen()
+                        } catch (error) {
+                            console.log(error)
+                        } finally {
+                            await fetchData()
+                            setLoading(false)
+                        }
+                    }}
+                />
+            </Modal>
+            <Modal open={voteResultOpened} onClose={onVoteResultClose}>
+                <Result
+                    text="<div class='alert alert-success'>Thank you for voting.</div>"
+                    onClose={onVoteResultClose}
                 />
             </Modal>
         </>

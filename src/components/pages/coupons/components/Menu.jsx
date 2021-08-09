@@ -6,7 +6,6 @@ const Menu = ({
     activeUrl, setActiveUrl,
 }) => (
         <>
-        {activeUrl}
             <Box type="ul" className="nav nav-tabs">
                 <Box type="li" className="nav-item" onClick={() => setActiveUrl('#my/coupons')}>
                     <a className={activeUrl === ('#my/coupons') ? 'nav-link active' : 'nav-link'} href="#my/coupons">My Coupons</a>

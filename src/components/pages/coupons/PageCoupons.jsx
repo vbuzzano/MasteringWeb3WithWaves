@@ -32,7 +32,7 @@ const PageCoupons = ({
         }
     }
 
-    useEffect(() => subscribe(DATA, refreshCoupons), [])
+    useEffect(() => subscribe(DATA, refreshCoupons), [account])
 
     return (
         <>

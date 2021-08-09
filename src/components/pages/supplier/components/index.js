@@ -1,2 +1,5 @@
 export { default as Menu } from './Menu'
 export { default as BalancePanel } from './BalancePanel'
+export { default as Register } from './Register'
+export { default as Manager } from './Manager'
+export { default as ApprovePurchases } from './ApprovePurchases'

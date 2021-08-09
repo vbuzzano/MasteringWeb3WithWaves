@@ -28,8 +28,8 @@ const HeightProps = styled.div`
     }
 `
 
-const FormSupplierRegister = ({
-    as, buttons, onClose, onSubmit,
+const FormVote = ({
+    as, buttons, onClose, onSubmit, coupon,
 }) => {
     const { register, handleSubmit, errors } = useForm()
     buttons ??= ['submit', 'cancel']
@@ -41,7 +41,7 @@ const FormSupplierRegister = ({
         >
             <Box bg="gray.0">
                 <Flex p="10px" justifyContent="center">
-                    <h2>Register as supplier</h2>
+                    <h2>{`Vote for ${coupon.name}`}</h2>
                 </Flex>
 
                 <Flex
@@ -56,31 +56,10 @@ const FormSupplierRegister = ({
                     <Box flex={1}>
                         <Box pb="8px">
                             <Controls.Input
-                                name="name"
-                                title="Name"
+                                name="salt"
+                                title="Secret words"
                                 forwardRef={register({ required: true })}
-                                error={errors.name}
-                            />
-                        </Box>
-                        <Box pb="8px">
-                            <Controls.Input
-                                type="email"
-                                name="email"
-                                title="Email"
-                                forwardRef={register({ required: true })}
-                                error={errors.email}
-                            />
-                        </Box>
-
-                        <Box pb="8px">
-                            <Controls.Input
-                                name="description"
-                                title="About you"
-                                height="150px"
-                                width="100%"
-                                control="textarea"
-                                forwardRef={register({ required: false })}
-                                error={errors.description}
+                                error={errors.salt}
                             />
                         </Box>
                     </Box>
@@ -95,7 +74,7 @@ const FormSupplierRegister = ({
                 ) : '' }
                 { buttons.includes('submit') ? (
                     <Controls.Button color="blue.0" type="submit">
-                        Register
+                        Vote
                     </Controls.Button>
                 ) : '' }
             </Controls.Footer>
@@ -103,4 +82,4 @@ const FormSupplierRegister = ({
     )
 }
 
-export default FormSupplierRegister
+export default FormVote

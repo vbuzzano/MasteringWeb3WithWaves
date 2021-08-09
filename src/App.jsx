@@ -2,30 +2,28 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useState, useEffect } from 'react'
 import { hot } from 'react-hot-loader/root'
-import { set } from 'ramda'
-
-import { Flex, Modal } from './components/shared'
-import {
-    Coupons, Purchases, Header, Footer,
-} from './containers'
+// import { set } from 'ramda'
+/*
 import {
     Dialog, Result, Form, FormSupplierRegister,
 } from './components/modal'
-import { useSupplierRegisterDialogs, useAppDialogs } from './components/service'
-import { UserContext } from './context'
-import {
+
+ import {
     fetchItems, registerSupplier, addItem, updateItem, removeItem,
     getDataByKey, fetchSupplierItems, fetchUserPurchases, fetchSupplierPurchases,
     purchaseCoupon, rejectPurchase, acceptPurchase, sendCouponToSupplier,
     getSupplierBalance, getSupplierAvailableBalance, burnCoupon, withdrawAvailable,
     fetchSupplierReceivedCoupons, fetchUserActiveCoupons,
 } from './api'
-import { asyncFilter } from './api/helper'
+*/
+// import { asyncFilter } from './api/helper'
 // import PageSupplier from './components/pages/manager'
+import { Modal } from './components/shared'
+import { Header } from './containers'
 import {
     fetchData, subscribe, ACCOUNT, DEFAULT_ACCOUNT,
 } from './libs/dApp'
-import { PageMarket, PageCoupons } from './components/pages'
+import { PageMarket, PageCoupons, PageSupplier } from './components/pages'
 
 const App = () => {
     const [activeUrl, setActiveUrl] = useState('')
@@ -167,18 +165,7 @@ const App = () => {
     }
 */
     const onAccountChange = async (acct) => {
-    //        await dApp.fetchData()
-
-        /**
-        if (window.dAppData) {
-            acct.isSupplier = !!getDataByKey(`${acct.address}_account`)
-            console.debug(`supplier = ${getDataByKey(`${acct.address}_account`)}`)
-        }
-
-        if (acct.isSupplier) {
-            // updateSupplier(acct.address)
-        }
-*/
+        console.debug('App: account change')
         setAccount(acct)
     }
 
@@ -196,7 +183,7 @@ const App = () => {
     useEffect(() => {
         console.debug('App: refresh DATA')
         fetchData()
-    }, [])
+    }, [account])
 
     return (
         <>
@@ -218,9 +205,7 @@ const App = () => {
                         account={account}
                         setActiveUrl={setActiveUrl}
                     />
-                )
-
-                : '' }
+                ) : '' }
 
             { activeUrl?.indexOf('#my') >= 0 && account.isConnected
                 ? (
@@ -229,9 +214,16 @@ const App = () => {
                         activeUrl={activeUrl}
                         setActiveUrl={setActiveUrl}
                     />
-                )
+                ) : '' }
 
-                : '' }
+            { activeUrl?.indexOf('#supplier') >= 0
+                ? (
+                    <PageSupplier
+                        account={account}
+                        activeUrl={activeUrl}
+                        setActiveUrl={setActiveUrl}
+                    />
+                ) : '' }
 
             <Modal open={loading}>
                 <div style={{ height: '100%', marginTop: '100px' }}>

@@ -1,7 +1,7 @@
+/* eslint-disable no-nested-ternary */
 import React from 'react'
 import styled from 'styled-components'
 
-import Coupon from '../components/coupon'
 import { Box } from '../components/shared'
 
 const Card = styled(Box)`
@@ -20,9 +20,8 @@ const Purchases = ({
 
     if (loading) {
         return (
-            <div style={{ height: '100%', marginTop: '100px' }}>
+            <div className="text-center">
                 <div className="spinner-border text-primary" role="status">
-                                Loading...
                     <span className="sr-only">...</span>
                 </div>
             </div>
@@ -34,9 +33,9 @@ const Purchases = ({
             return (
                 <div className="alert alert-dark text-center">
                 No purchases yet, go to &nbsp;
-                    <a className="btn btn-primary" href="#manage/coupons" onClick={() => setActiveUrl('#manage/coupons')}>
-                    Manage Coupons
-                    </a>
+                    <Box as="span" onClick={() => setActiveUrl('#supplier/coupons')}>
+                        <a className="btn btn-primary" href="#supplier/coupons">Manage Coupons</a>
+                    </Box>
                 &nbsp; to add, update or remove coupons
                 </div>
             )
@@ -58,7 +57,7 @@ const Purchases = ({
                             maxWidth: '200px', width: '200px', maxHeight: '60px', overflow: 'hidden',
                         }}
                         >
-                            <img src={purchase.item.image} style={{ maxWidth: '200px', width: '200px' }} />
+                            <img src={purchase.item.image} style={{ maxWidth: '200px', width: '200px' }} alt="" />
                         </div>
                         <ul>
                             <li>{`isBurned: ${purchase.isBurned}`}</li>
@@ -111,16 +110,6 @@ const Purchases = ({
                                 &nbsp;
                                 <button type="button" className="btn btn-warning" onClick={() => onReject(purchase)}>
                                     Reject
-                                </button>
-                            </>
-                        )
-                        : ''
-                    }
-                    {!purchase.isFundPaid && (purchase.isExpired || purchase.isBurned) && purchase.status === 'accepted' && isManage
-                        ? (
-                            <>
-                                <button type="button" className="btn btn-primary" onClick={() => onWithdraw(purchase)}>
-                                    Withdraw fund
                                 </button>
                             </>
                         )

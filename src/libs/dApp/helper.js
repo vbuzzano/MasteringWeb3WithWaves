@@ -1,7 +1,8 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable max-len */
+import { sha256, base58encode } from '@waves/waves-crypto'
 
-import { DAPP_ADDRESS } from '../libs/dApp'
+import { DAPP_ADDRESS } from './dApp'
 
 const dataListToObj = (list) => {
     const rv = {}
@@ -189,9 +190,10 @@ export const fetchUserActiveCoupons = async (address) => {
 export const fetchSupplierItems = async address =>
     await prepareItems(getSupplierItemIds(address))
 
-export const fetchSupplierPurchases = async address =>
-    await preparePurchases(getSupplierPurchaseIds(address))
-
+export const fetchSupplierPurchases = async (address) => {
+    const list = await preparePurchases(getSupplierPurchaseIds(address))
+    return list
+}
 export const fetchSupplierCoupons = async (address) => {
     const list = await fetchSupplierPurchases(address)
     return list.filter(e => e.status === 'accepted')
@@ -240,4 +242,10 @@ export const getSupplierAvailableBalance = async (address) => {
         }
     }
     return 0
+}
+
+export const hashVote = (item, vote, salt) => {
+    const value = `${item}${vote}${salt}`
+    const bytes = new TextEncoder().encode(value)
+    return base58encode(sha256(bytes))
 }

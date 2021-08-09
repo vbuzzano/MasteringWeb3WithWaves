@@ -26,10 +26,8 @@ const mapStateToProps = state => ({
 
 const initActiveUrl = (setActiveUrl) => {
     const { href } = window.location
-    console.debug(href)
     if (href.startsWith('http')) {
         const pos = href.indexOf('#')
-        console.debug(pos)
         if (pos > 0) {
             setActiveUrl(href.substr(pos))
         } else {
@@ -66,7 +64,7 @@ const Header = ({
                     px={{
                         0: '20px',
                         lg: '39px',
-                        xl: '114px',
+                        xl: '20px',
                     }}
                     pt={{
                         0: '14px',

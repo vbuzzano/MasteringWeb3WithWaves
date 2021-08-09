@@ -2,10 +2,12 @@ export const headerLinks = [
     {
         url: '#market',
         title: 'Market',
+        isEnabled: () => true,
     },
     {
-        url: '#my/coupons',
-        title: 'My Coupons',
+        url: '#supplier',
+        title: 'Supplier',
+        isEnabled: () => true,
     },
 ]
 
@@ -40,24 +42,29 @@ export const companyLinks = [
 
 export const workLinks = [
     {
-        url: '#work1',
-        title: 'Join the Coupon Bazaar',
+        url: '#register',
+        title: 'Register as Supplier',
+        isEnabled: e => e.isSupplier,
     },
     {
-        url: '#work2',
-        title: 'Run a Groupon Deal',
+        url: '#my/coupons',
+        title: 'Use your coupons',
+        isEnabled: () => false,
     },
     {
         url: '#work3',
         title: 'Learn About Groupon Merchant',
+        isEnabled: () => false,
     },
     {
         url: '#work4',
         title: 'Affiliate Program',
+        isEnabled: () => false,
     },
     {
         url: '#work5',
         title: 'Vendor Code of Conduct',
+        isEnabled: () => false,
     },
 ]
 
@@ -65,18 +72,22 @@ export const moreLinks = [
     {
         url: '#more1',
         title: 'Customer Support',
+        isEnabled: () => false,
     },
     {
         url: '#more2',
         title: 'Refund Policies',
+        isEnabled: () => false,
     },
     {
         url: '#more3',
         title: 'FAQ',
+        isEnabled: () => false,
     },
     {
         url: '#more4',
         title: 'Miles & Points',
+        isEnabled: () => false,
     },
 ]
 
@@ -85,13 +96,16 @@ export const mainLinks = [
     {
         url: '#main1',
         title: 'Goods',
+        isEnabled: () => false,
     },
     {
-        url: '#main2',
+        url: '#my/coupons',
         title: 'Coupons',
+        isEnabled: () => false,
     },
     {
         url: '#main3',
         title: 'Contacts',
+        isEnabled: () => false,
     },
 ]
