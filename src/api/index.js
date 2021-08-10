@@ -1,0 +1,1 @@
+// import { coupons } from './response'

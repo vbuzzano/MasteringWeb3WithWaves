@@ -1,9 +1,5 @@
-/* global before,setupAccounts, accountData, accounts, address,
-        broadcast, waitForTx,
-        file, compile, setScript, invokeScript,
-        data
-*/
 /* eslint no-undef: "error" */
+/* eslint-disable no-undef */
 
 const wvs = 10 ** 8
 

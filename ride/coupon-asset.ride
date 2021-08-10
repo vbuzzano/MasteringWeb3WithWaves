@@ -1,0 +1,69 @@
+{-# STDLIB_VERSION 4 #-}
+{-# CONTENT_TYPE EXPRESSION #-}
+{-# SCRIPT_TYPE ASSET #-}
+
+let NONE = "none"
+
+let dAppPubKey = base58'3tp5fNYyPi4jMnkf6s1k4kBqvJ7nm57SxzvLyi8RkxT2'
+let dApp = addressFromPublicKey(dAppPubKey)
+
+func getStringByKey(address: Address, key: String) = { 
+    match getString(address, key) {
+        case a: String => a
+        case _ => NONE
+    }
+}
+
+func getIntegerByKey(address: Address, key: String) = { 
+    match getInteger(address, key) {
+        case a: Int => a
+        case _ => 0
+    }
+}
+
+func getKeyCoupon(assetId: String) = "coupon_" + assetId
+func getKeyCouponItem(coupon: String) = coupon + "_item"
+func getKeyItemSupplier(item: String) = item + "_owner"
+func getKeyItemExpireDate(item: String) = item + "_expiredate"
+
+func getItem(coupon: String) = getStringByKey(dApp, getKeyCouponItem(coupon))
+func getItemSupplier(item: String) = getStringByKey(dApp, getKeyItemSupplier(item))
+func getItemExpireDate(item: String) = getIntegerByKey(dApp, getKeyItemSupplier(item))
+
+let coupon = getKeyCoupon(toBase58String(this.id))
+let item = getItem(coupon)
+let expire = getItemExpireDate(item)
+let supplier  = getItemSupplier(item)
+let isExpired = expire >= tx.timestamp
+
+func checkAndAcceptSetScript(e: SetAssetScriptTransaction) = e.sender == dApp
+
+func checkAndAcceptBurn(e: BurnTransaction) = 
+    if(e.sender == dApp || e.sender == addressFromString(supplier)) then true
+    else throw("Only coupon's supplier can burn this coupon") 
+
+func checkAndAcceptTransfer(e: TransferTransaction) = 
+    if (e.sender == dApp || e.sender == addressFromString(supplier)) then true
+    else if (e.recipient == addressFromString(supplier)) then true
+    else throw("You can transfer this coupon only to supplier " + supplier)
+
+func checkAndAcceptInvokeScript(e: InvokeScriptTransaction) = 
+    if (e.sender == dApp || e.sender == addressFromString(supplier)) then true
+    else if (e.sender == addressFromString(supplier)) then true
+    else throw("You can only invoke script of Coupon Bazaar Market dApp")
+
+if (item == NONE) then throw("Item not found for coupon " + coupon)
+else if (supplier == NONE) then throw("Supplier for item " + item + " not found")
+else if (isExpired) then match (tx) {
+    case e: SetAssetScriptTransaction => checkAndAcceptSetScript(e)
+    case e:BurnTransaction => true
+    case _ => throw("This coupon has expired and can only be burned to remove it from your wallet")
+} else match (tx) {
+    case e:SetAssetScriptTransaction => checkAndAcceptSetScript(e)
+    case e:BurnTransaction => checkAndAcceptBurn(e)
+    case e:TransferTransaction => checkAndAcceptTransfer(e)
+    case e:InvokeScriptTransaction => checkAndAcceptInvokeScript(e)
+    case _ => if (tx.sender == addressFromString(supplier)) then
+        throw("This coupon can only be use to supplier in an exchange of good or service with discount")
+        else throw("This coupon can be burned to enable withdraw funds")
+}

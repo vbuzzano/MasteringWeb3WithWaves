@@ -1,0 +1,15 @@
+{
+    "recommendations": [
+        "streetsidesoftware.code-spell-checker",
+        "dbaeumer.vscode-eslint",
+        "wallabyjs.quokka-vscode",
+        "esbenp.prettier-vscode",
+        "2gua.rainbow-brackets",
+        "robbowen.synthwave-vscode",
+        "rangav.vscode-thunder-client",
+        "0xorial.webpack-dev-server",
+        "redhat.vscode-yaml",
+        "bierner.emojisense",
+        "formulahendry.auto-rename-tag"
+    ]
+}
