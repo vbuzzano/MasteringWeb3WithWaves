@@ -6,7 +6,6 @@ import Hamburger from './Hamburger'
 
 import { Flex, Box } from '../shared'
 import BTLogin from '../custom/btLogin'
-import BTSupplierRegister from '../custom/btRegisterSupplier'
 
 const menuIndent = {
     0: '16px',
@@ -14,9 +13,7 @@ const menuIndent = {
 }
 
 const DesktopHeader = ({
-    supplierApprovalCounter,
     account,
-    onSupplierRegister,
     links,
     activeUrl,
     setActiveUrl,
@@ -47,69 +44,73 @@ const DesktopHeader = ({
                 <Flex>
                     <MediaQuery minWidth={tabletResolution}>
                         {links.map(({ url, title, isEnabled }, index) => (
-                            <>
-                            { typeof isEnabled === 'function' && isEnabled(account) ? (
-                                <Box key={url} as="span" pl={index !== 0 && menuIndent}>
-                                    <a href={url}>
-                                        <Controls.MenuItem
-                                            active={activeUrl?.indexOf(url) >= 0}
-                                            onClick={() => setActiveUrl(url)}
-                                        >
-                                            {title}
-                                        </Controls.MenuItem>
-                                    </a>
-                                </Box>
-                            ) : '' }
-                            </>
+                            <Box key={url}>
+                                { typeof isEnabled === 'function' && isEnabled(account) ? (
+                                    <Box as="span" pl={index !== 0 && menuIndent}>
+                                        <a href={url}>
+                                            <Controls.MenuItem
+                                                active={activeUrl?.indexOf(url) >= 0}
+                                                onClick={() => setActiveUrl(url)}
+                                            >
+                                                {title}
+                                            </Controls.MenuItem>
+                                        </a>
+                                    </Box>
+                                ) : '' }
+                            </Box>
                         ))}
                     </MediaQuery>
                 </Flex>
             </Flex>
             <Flex alignItems="center">
                 {userLinks.map(({ url, title, isEnabled }, index) => (
-                    <>
-                    { typeof isEnabled === 'function' && isEnabled(account) ? (
-                        <Fragment key={url}>
-                            {index !== 0 && (
-                                <Box width="1px" as="span" mx="6px" height="13px" bg="gray.2" />
-                            )}
-                            <a href={url}>
-                                <Controls.MenuItem
-                                    active={activeUrl?.indexOf(url) >= 0}
-                                    onClick={() => setActiveUrl(url)}
-                                >
-                                    {title}
-                                </Controls.MenuItem>
-                            </a>
-                        </Fragment>
-                    ) : ''}
-                    </>
+                    <Box key={url}>
+                        { typeof isEnabled === 'function' && isEnabled(account) ? (
+                            <Fragment key={url}>
+                                {index !== 0 && (
+                                    <Box width="1px" as="span" mx="6px" height="13px" bg="gray.2" />
+                                )}
+                                <a href={url}>
+                                    <Controls.MenuItem
+                                        active={activeUrl?.indexOf(url) >= 0}
+                                        onClick={() => setActiveUrl(url)}
+                                    >
+                                        {title}
+                                    </Controls.MenuItem>
+                                </a>
+                            </Fragment>
+                        ) : ''}
+                    </Box>
                 ))}
                 <Fragment>
                     <Box width="1px" as="span" mx="6px" height="13px" bg="gray.2" />
                     <Controls.MenuItem>
-                        <BTLogin account={account} />
+                        <BTLogin account={account} setActiveUrl={setActiveUrl} />
                     </Controls.MenuItem>
                 </Fragment>
                 <Fragment>
-                    <Box width="1px" as="span" mx="6px" height="13px" bg="gray.2" />
-                    <Box as="span">
-                        <a href="#manage/approve">
-                            <Controls.MenuItem
-                                onClick={() => setActiveUrl('#manage/approve')}
-                                style={{ display: 'flex' }}
-                            >
-                                <Controls.ShopIcon />
-                                { (supplierApprovalCounter > 0) ? (
-                                    <Box position="relative" top="-10px" left="-6px">
-                                        <Controls.RoundMarkIcon />
-                                    </Box>
-                                )
-                                    : ''
-                                }
-                            </Controls.MenuItem>
-                        </a>
-                    </Box>
+                    {account?.isSupplier ? (
+                        <>
+                            <Box width="1px" as="span" mx="6px" height="13px" bg="gray.2" />
+                            <Box as="span">
+                                <a href="#manage/approve">
+                                    <Controls.MenuItem
+                                        onClick={() => setActiveUrl('#supplier/approve')}
+                                        style={{ display: 'flex' }}
+                                    >
+                                        <Controls.ShopIcon />
+                                        { (account?.supplier?.approvalCounter > 0) ? (
+                                            <Box position="relative" top="-10px" left="-6px">
+                                                <Controls.RoundMarkIcon />
+                                            </Box>
+                                        )
+                                            : ''
+                                        }
+                                    </Controls.MenuItem>
+                                </a>
+                            </Box>
+                        </>
+                    ) : '' }
                 </Fragment>
                 <MediaQuery minWidth={mobileResolution}>
                     <Box pl="20px">

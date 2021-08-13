@@ -2,11 +2,15 @@ import { nodeInteraction } from '@waves/waves-transactions'
 
 import EventEmitter from 'events'
 
+import { getSupplierApprovalCounter } from './helper'
+
+import config from '../../../config'
+
 const DEFAULT_ACCOUNT = {
     isConnected: false,
     isSupplier: false,
 }
-const DEFAULT_NETWORK = {
+const DEFAULT_NETWORK = config.defaultNetwork || {
     code: 'T',
     matcher: 'https://matcher-testnet.wavesnodes.com/',
     server: 'https://nodes-testnet.wavesnodes.com/',
@@ -15,10 +19,10 @@ const DEFAULT_STATE = {}
 
 // dapp seed if needed
 // hood gorilla maple tag feed make shine public cake devote grace spy neck eager solve
-const DAPP_ADDRESS = '3MovmZoJtqutkf49oGXHzABSMUQ7HU5Dcg7'
-const BASE_URI = 'https://nodes-testnet.wavesnodes.com'
-const CHAIN_ID = 84
-const NETWORK_ID = 'testnet'
+const DAPP_ADDRESS = config.dAppAddress
+const BASE_URI = config.defaultNetwork.server
+const CHAIN_ID = config.chainId
+const NETWORK_ID = config.networkId
 
 const ee = new EventEmitter()
 const { WavesKeeper } = window
@@ -90,6 +94,23 @@ function setValue(type, data) {
     ee.emit(type, data)
 }
 
+function currentNetwork() {
+    return values[NETWORK]
+}
+
+function currentAccount() {
+    return values[ACCOUNT]
+}
+
+async function fetchData() {
+    const data = await nodeInteraction.accountData(DAPP_ADDRESS, BASE_URI)
+    window.dAppData = data
+    window.dAppDataKeys = Object.keys(data)
+    console.debug('[ 🔄 dApp data ] :', `${window.dAppDataKeys?.length} keys loaded`)
+    setValue(DATA, data)
+    return data
+}
+
 async function disconnect() {
     delSession(values[ACCOUNT]?.address)
     // eslint-disable-next-line no-use-before-define
@@ -107,26 +128,34 @@ async function onStateChange(state) {
     const account = values[ACCOUNT]
     const nwk = state.network
     let acct = state.account
-    const session = getSession(acct.address)
-    acct.isConnected = session?.address === acct.address
+    if (acct) {
+        const session = getSession(acct.address)
+        acct.isConnected = session?.address === acct.address
 
-    if (acct.network !== NETWORK_ID || nwk.code !== DEFAULT_NETWORK.code) {
-        notifyAlert(`Please switch WavesKeeper to ${NETWORK_ID}`)
-        if (account.isConnected) {
-            await disconnect()
+        if (acct.network !== NETWORK_ID || nwk.code !== DEFAULT_NETWORK.code) {
+            notifyAlert(`Please switch WavesKeeper to ${NETWORK_ID}`)
+            if (account.isConnected) {
+                await disconnect()
+            }
+            acct = DEFAULT_ACCOUNT
         }
-        acct = DEFAULT_ACCOUNT
-    }
 
-    const data = await nodeInteraction.accountDataByKey(`${acct.address}_account`, DAPP_ADDRESS, BASE_URI)
-    if (data && data.type === 'string') {
-        acct.supplier = JSON.parse(data.value)
-    } else {
-        delete acct.supplier
-    }
-    acct.isSupplier = typeof acct.supplier === 'object'
+        const data = await nodeInteraction.accountDataByKey(`${acct.address}_account`, DAPP_ADDRESS, BASE_URI)
+        if (data && data.type === 'string') {
+            acct.supplier = JSON.parse(data.value)
+        } else {
+            delete acct.supplier
+        }
+        if (typeof acct.supplier === 'object') {
+            acct.supplier.approvalCounter = await getSupplierApprovalCounter(acct.address)
+            acct.isSupplier = true
+        }
 
-    setValue(ACCOUNT, acct)
+        setValue(ACCOUNT, acct)
+        if (Boolean(account.isConnected) !== Boolean(acct.isConnected)) {
+            await fetchData()
+        }
+    }
     setValue(NETWORK, nwk)
 }
 
@@ -179,16 +208,9 @@ if (WavesKeeper) {
     })
 }
 
-async function fetchData() {
-    const data = await nodeInteraction.accountData(DAPP_ADDRESS, BASE_URI)
-    window.dAppData = data
-    window.dAppDataKeys = Object.keys(data)
-    console.debug('[ 🔄 dApp data ] :', `${window.dAppDataKeys?.length} keys loaded`)
-    setValue(DATA, data)
-    return data
-}
-
 export {
+    currentAccount,
+    currentNetwork,
     connect,
     disconnect,
     subscribe,

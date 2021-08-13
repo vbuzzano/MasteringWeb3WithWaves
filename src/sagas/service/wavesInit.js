@@ -6,6 +6,7 @@ import { stringToUint8Array, sha256, base58encode } from '@waves/waves-crypto'
 import { call } from 'redux-saga/effects'
 
 import * as dApp from '../../libs/dApp'
+import { fetchData } from '../../libs/dApp'
 
 // import AuthService from './auth'
 
@@ -24,14 +25,13 @@ window.wt = {
 window.app = dApp
 
 export default function* wavesInit() {
-/*
     try {
         console.debug('WavesInit: fetchData')
         yield call(fetchData)
     } catch (error) {
         console.log(error)
     }
-*/
+
 /*
     try {
         const v = yield call(nodeInteraction.accountData, dappAddress, baseUri)

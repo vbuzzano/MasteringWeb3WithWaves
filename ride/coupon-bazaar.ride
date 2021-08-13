@@ -59,7 +59,6 @@ func getKeyItemStatus(item: String) = item + "_status"
 func getKeyVotesCount(item: String, vote: String) = item + "_res:" + vote
 
 func getKeySupplierBalance(supplier: String) = supplier + "_balance"
-func getKeySupplierAvailableBalance(supplier: String) = supplier + "_available"
 func getKeyUserItemCounter(user: String, item: String) = user + "_" + item + "_counter"
 
 func genPurchaseKey(supplier: String, item: String, user: String, counter: Int) = 
@@ -81,9 +80,6 @@ func getKeyCouponItem(assetId: String) ="coupon_" + assetId + "_item"
 
 func getValueSupplierBalance(supplier: String) =
     getIntegerByKey(getKeySupplierBalance(supplier))
-
-func getValueSupplierAvailableBalance(supplier: String) =
-    getIntegerByKey(getKeySupplierAvailableBalance(supplier))
 
 func getValueUserItemCounter(user: String, item: String) =
     getIntegerByKey(getKeyUserItemCounter(user, item))
@@ -271,7 +267,6 @@ func rejectPurchase(purchase: String) = {
     else {
         let keyPurchaseStatus = getKeyPurchaseStatus(purchase)
         let keyPurchaseAmount = getKeyPurchaseAmount(purchase)
-        let keySupplierBalance = getKeySupplierBalance(supplier)
         let keyItemSoldCounter = getKeyItemSoldCounter(item)
         let user = getValuePurchaseUser(purchase)
         let amount = getValuePurchaseAmount(purchase)
@@ -288,7 +283,7 @@ func rejectPurchase(purchase: String) = {
 }
 
 @Callable(i)
- func acceptPurchase(purchase: String, couponAssetId: String) = {
+ func acceptPurchase(purchase: String, assetId: String) = {
     let caller = toBase58String(i.caller.bytes)
     let status = getValuePurchaseStatus(purchase)
     let supplier = getValuePurchaseSupplier(purchase)
@@ -304,11 +299,11 @@ func rejectPurchase(purchase: String) = {
         let keyPurchaseAssetId = getKeyPurchaseAssetId(purchase)
         let keySupplierBalance = getKeySupplierBalance(supplier)
         let keyItemSoldCounter = getKeyItemSoldCounter(item)
-        let keyCouponPurchase = getKeyCouponPurchase(couponAssetId)
-        let keyCouponItem = getKeyCouponItem(couponAssetId)
+        let keyCouponPurchase = getKeyCouponPurchase(assetId)
+        let keyCouponItem = getKeyCouponItem(assetId)
 
         let amount = getValuePurchaseAmount(purchase)
-        let supplierBalance = getValueSupplierBalance(supplier) + amount
+        let newBalance = getValueSupplierBalance(supplier) + amount
         let itemSoldCounter = getValueItemSoldCounter(item) + 1
 
         # # Issue Coupon and link it with item
@@ -326,10 +321,10 @@ func rejectPurchase(purchase: String) = {
               StringEntry(keyPurchaseStatus, ACCEPTED)
             , StringEntry(keyCouponPurchase, purchase)
             , StringEntry(keyCouponItem, item)
-            , StringEntry(keyPurchaseAssetId, couponAssetId)
-            , IntegerEntry(keySupplierBalance, supplierBalance)
+            , StringEntry(keyPurchaseAssetId, assetId)
+            , IntegerEntry(keySupplierBalance, newBalance)
             , IntegerEntry(keyItemSoldCounter, itemSoldCounter)
-            # , ScriptTransfer(address, 1, fromBase58String(couponAssetId))
+            # , ScriptTransfer(address, 1, fromBase58String(assetId))
         ]
     }
 }
@@ -342,49 +337,32 @@ func rejectPurchase(purchase: String) = {
 
     if (isDefined(pmt.assetId) == false) then throw("Need a coupon to burn")
     else {
-        let assetId = match pmt.assetId {
+        let asset = match pmt.assetId {
     	    case e: ByteVector => e
 			case _ => throw("Need a coupon to burn")
 		}
-        let asset = toBase58String(assetId)
-        let purchase = getValueCouponPurchase(asset)
+        let assetId = toBase58String(asset)
+        let purchase = getValueCouponPurchase(assetId)
         let supplier = getValuePurchaseSupplier(purchase)
+        let isfundPaid = getValuePurchaseFundPaid(assetId)
         if (caller != supplier) then throw("Your are not the supplier for this coupon")
+        else if (isfundPaid) then throw("Fund has already been paid")
         else {
-            let keySupplierAvailableBalance = getKeySupplierAvailableBalance(supplier)
-            let keyCouponFundPaid = getKeyPurchaseFundPaid(asset)
+            let balance = getValueSupplierBalance(supplier)
             let amount = getValuePurchaseAmount(purchase)
-            let availableBalance = getValueSupplierAvailableBalance(supplier) + amount
-
-            [
-                  Burn(assetId, 1)
-                , BooleanEntry(keyCouponFundPaid, true)
-                , IntegerEntry(keySupplierAvailableBalance, availableBalance)
-            ]
-        }       
-    }
-}
-
-@Callable(i)
- func withdrawAvailable() = {
-    let supplier = toBase58String(i.caller.bytes)
-    let account = getSupplierAccount(supplier)
-    if (account == NONE) then throw("You are not registred as supplier")
-    else {
-        let balance = getValueSupplierBalance(supplier)
-        let available = getValueSupplierAvailableBalance(supplier)
-        let amount = if (balance - available < 0) then 0 else available
-        if (amount == 0) then throw("Nothing to withdraw. You need to burn coupon to unlock balance")
-        else { 
-            let keySupplierBalance = getKeySupplierBalance(supplier)
-            let keySupplierAvailableBalance = getKeySupplierAvailableBalance(supplier)
-            let newBalance = balance - amount
-            [
-                  IntegerEntry(keySupplierBalance, newBalance)
-                , IntegerEntry(keySupplierAvailableBalance, 0)
-                , ScriptTransfer(i.caller, amount, unit)
-
-            ]
+            let withdrawAmt = if (balance - amount ) <= 0 then balance else  amount
+            let newBalance = balance - withdrawAmt
+            if (newBalance <= 0) then throw("Not enough funds to withdraw")
+            else {
+                let keySupplierBalance = getKeySupplierBalance(supplier)
+                let keyCouponFundPaid = getKeyPurchaseFundPaid(assetId)
+                [
+                      Burn(asset, 1)
+                    , BooleanEntry(keyCouponFundPaid, true)
+                    , IntegerEntry(keySupplierBalance, newBalance)
+                    , ScriptTransfer(i.caller, withdrawAmt, unit)
+                ]
+            }
         }       
     }
 }
@@ -413,12 +391,20 @@ func rejectPurchase(purchase: String) = {
 
             if (!canWithdraw) then throw("This coupon cannot be funded")
             else {
-                let keyCouponFundPaid = getKeyPurchaseFundPaid(assetId)
+                let balance = getValueSupplierBalance(supplier)
                 let amount = getValuePurchaseAmount(purchase)
-                [
-                      BooleanEntry(keyCouponFundPaid, true)
-                    , ScriptTransfer(i.caller, amount, unit)
-                ]
+                let withdrawAmt = if (balance - amount ) <= 0 then balance else  amount
+                let newBalance = balance - withdrawAmt
+                if (newBalance <= 0) then throw("Not enough funds to withdraw")
+                else {
+                    let keySupplierBalance = getKeySupplierBalance(supplier)
+                    let keyCouponFundPaid = getKeyPurchaseFundPaid(assetId)
+                    [
+                          BooleanEntry(keyCouponFundPaid, true)
+                        , IntegerEntry(keySupplierBalance, newBalance)
+                        , ScriptTransfer(i.caller, withdrawAmt, unit)
+                    ]
+                }
             }
         }       
     }

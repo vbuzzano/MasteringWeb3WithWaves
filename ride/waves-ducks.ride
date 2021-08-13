@@ -1,0 +1,700 @@
+{-# STDLIB_VERSION 5 #-}
+{-# SCRIPT_TYPE ACCOUNT #-}
+{-# CONTENT_TYPE DAPP #-}
+let eggsAssetId = base58'JCGDtrVy64cCJ1wCKfCaiNQMnyYwii71TbE5QeAHfxgF'
+
+let perchPrice = 100
+
+let scale = 10000
+
+let scale2 = 1000000
+
+let incubatorAddress = base58'3PEktVux2RhchSN63DsDo4b4mz4QqzKSeDv'
+
+let breederAddress = base58'3PDVuU45H7Eh5dmtNbnRNRStGwULA7NY6Hb'
+
+let refContractAddress = base58'3P8ejTkfRpz9WqCwCuihesNXU5k3zmFFfVe'
+
+let RefererReward = 5
+
+let GENS = ["A", "B", "C", "D", "E", "F", "G"]
+
+func getRewardPerBlock () = 684
+
+
+func tryGetInteger (key) = match getInteger(this, key) {
+    case b: Int => 
+        b
+    case _ => 
+        0
+}
+
+
+func tryGetString (key) = match getString(this, key) {
+    case a: String => 
+        a
+    case _ => 
+        ""
+}
+
+
+func isSymbolA (accumulated,sym) = if ((sym == "A"))
+    then (accumulated + 1)
+    else (accumulated + 0)
+
+
+func isSymbolB (accumulated,sym) = if ((sym == "B"))
+    then (accumulated + 1)
+    else (accumulated + 0)
+
+
+func isSymbolC (accumulated,sym) = if ((sym == "C"))
+    then (accumulated + 1)
+    else (accumulated + 0)
+
+
+func isSymbolD (accumulated,sym) = if ((sym == "D"))
+    then (accumulated + 1)
+    else (accumulated + 0)
+
+
+func isSymbolE (accumulated,sym) = if ((sym == "E"))
+    then (accumulated + 1)
+    else (accumulated + 0)
+
+
+func isSymbolF (accumulated,sym) = if ((sym == "F"))
+    then (accumulated + 1)
+    else (accumulated + 0)
+
+
+func isSymbolG (accumulated,sym) = if ((sym == "G"))
+    then (accumulated + 1)
+    else (accumulated + 0)
+
+
+func isSymbolH (accumulated,sym) = if ((sym == "H"))
+    then (accumulated + 1)
+    else (accumulated + 0)
+
+
+func getAmountOrClear (amount) = if (contains(amount, "0"))
+    then ""
+    else amount
+
+
+func getGen (assetName) = {
+    let genotype = split(dropRight(drop(assetName, 5), 3), "")
+    (((((((getAmountOrClear((toString({
+        let $list19521983 = genotype
+        let $size19521983 = size($list19521983)
+        let $acc019521983 = 0
+        if (($size19521983 == 0))
+            then $acc019521983
+            else {
+                let $acc119521983 = isSymbolA($acc019521983, $list19521983[0])
+                if (($size19521983 == 1))
+                    then $acc119521983
+                    else {
+                        let $acc219521983 = isSymbolA($acc119521983, $list19521983[1])
+                        if (($size19521983 == 2))
+                            then $acc219521983
+                            else {
+                                let $acc319521983 = isSymbolA($acc219521983, $list19521983[2])
+                                if (($size19521983 == 3))
+                                    then $acc319521983
+                                    else {
+                                        let $acc419521983 = isSymbolA($acc319521983, $list19521983[3])
+                                        if (($size19521983 == 4))
+                                            then $acc419521983
+                                            else {
+                                                let $acc519521983 = isSymbolA($acc419521983, $list19521983[4])
+                                                if (($size19521983 == 5))
+                                                    then $acc519521983
+                                                    else {
+                                                        let $acc619521983 = isSymbolA($acc519521983, $list19521983[5])
+                                                        if (($size19521983 == 6))
+                                                            then $acc619521983
+                                                            else {
+                                                                let $acc719521983 = isSymbolA($acc619521983, $list19521983[6])
+                                                                if (($size19521983 == 7))
+                                                                    then $acc719521983
+                                                                    else {
+                                                                        let $acc819521983 = isSymbolA($acc719521983, $list19521983[7])
+                                                                        if (($size19521983 == 8))
+                                                                            then $acc819521983
+                                                                            else {
+                                                                                let $acc919521983 = isSymbolA($acc819521983, $list19521983[8])
+                                                                                throw("List size exceed 8")
+                                                                                }
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }) + "A")) + getAmountOrClear((toString({
+        let $list20202051 = genotype
+        let $size20202051 = size($list20202051)
+        let $acc020202051 = 0
+        if (($size20202051 == 0))
+            then $acc020202051
+            else {
+                let $acc120202051 = isSymbolB($acc020202051, $list20202051[0])
+                if (($size20202051 == 1))
+                    then $acc120202051
+                    else {
+                        let $acc220202051 = isSymbolB($acc120202051, $list20202051[1])
+                        if (($size20202051 == 2))
+                            then $acc220202051
+                            else {
+                                let $acc320202051 = isSymbolB($acc220202051, $list20202051[2])
+                                if (($size20202051 == 3))
+                                    then $acc320202051
+                                    else {
+                                        let $acc420202051 = isSymbolB($acc320202051, $list20202051[3])
+                                        if (($size20202051 == 4))
+                                            then $acc420202051
+                                            else {
+                                                let $acc520202051 = isSymbolB($acc420202051, $list20202051[4])
+                                                if (($size20202051 == 5))
+                                                    then $acc520202051
+                                                    else {
+                                                        let $acc620202051 = isSymbolB($acc520202051, $list20202051[5])
+                                                        if (($size20202051 == 6))
+                                                            then $acc620202051
+                                                            else {
+                                                                let $acc720202051 = isSymbolB($acc620202051, $list20202051[6])
+                                                                if (($size20202051 == 7))
+                                                                    then $acc720202051
+                                                                    else {
+                                                                        let $acc820202051 = isSymbolB($acc720202051, $list20202051[7])
+                                                                        if (($size20202051 == 8))
+                                                                            then $acc820202051
+                                                                            else {
+                                                                                let $acc920202051 = isSymbolB($acc820202051, $list20202051[8])
+                                                                                throw("List size exceed 8")
+                                                                                }
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }) + "B"))) + getAmountOrClear((toString({
+        let $list20882119 = genotype
+        let $size20882119 = size($list20882119)
+        let $acc020882119 = 0
+        if (($size20882119 == 0))
+            then $acc020882119
+            else {
+                let $acc120882119 = isSymbolC($acc020882119, $list20882119[0])
+                if (($size20882119 == 1))
+                    then $acc120882119
+                    else {
+                        let $acc220882119 = isSymbolC($acc120882119, $list20882119[1])
+                        if (($size20882119 == 2))
+                            then $acc220882119
+                            else {
+                                let $acc320882119 = isSymbolC($acc220882119, $list20882119[2])
+                                if (($size20882119 == 3))
+                                    then $acc320882119
+                                    else {
+                                        let $acc420882119 = isSymbolC($acc320882119, $list20882119[3])
+                                        if (($size20882119 == 4))
+                                            then $acc420882119
+                                            else {
+                                                let $acc520882119 = isSymbolC($acc420882119, $list20882119[4])
+                                                if (($size20882119 == 5))
+                                                    then $acc520882119
+                                                    else {
+                                                        let $acc620882119 = isSymbolC($acc520882119, $list20882119[5])
+                                                        if (($size20882119 == 6))
+                                                            then $acc620882119
+                                                            else {
+                                                                let $acc720882119 = isSymbolC($acc620882119, $list20882119[6])
+                                                                if (($size20882119 == 7))
+                                                                    then $acc720882119
+                                                                    else {
+                                                                        let $acc820882119 = isSymbolC($acc720882119, $list20882119[7])
+                                                                        if (($size20882119 == 8))
+                                                                            then $acc820882119
+                                                                            else {
+                                                                                let $acc920882119 = isSymbolC($acc820882119, $list20882119[8])
+                                                                                throw("List size exceed 8")
+                                                                                }
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }) + "C"))) + getAmountOrClear((toString({
+        let $list21582189 = genotype
+        let $size21582189 = size($list21582189)
+        let $acc021582189 = 0
+        if (($size21582189 == 0))
+            then $acc021582189
+            else {
+                let $acc121582189 = isSymbolD($acc021582189, $list21582189[0])
+                if (($size21582189 == 1))
+                    then $acc121582189
+                    else {
+                        let $acc221582189 = isSymbolD($acc121582189, $list21582189[1])
+                        if (($size21582189 == 2))
+                            then $acc221582189
+                            else {
+                                let $acc321582189 = isSymbolD($acc221582189, $list21582189[2])
+                                if (($size21582189 == 3))
+                                    then $acc321582189
+                                    else {
+                                        let $acc421582189 = isSymbolD($acc321582189, $list21582189[3])
+                                        if (($size21582189 == 4))
+                                            then $acc421582189
+                                            else {
+                                                let $acc521582189 = isSymbolD($acc421582189, $list21582189[4])
+                                                if (($size21582189 == 5))
+                                                    then $acc521582189
+                                                    else {
+                                                        let $acc621582189 = isSymbolD($acc521582189, $list21582189[5])
+                                                        if (($size21582189 == 6))
+                                                            then $acc621582189
+                                                            else {
+                                                                let $acc721582189 = isSymbolD($acc621582189, $list21582189[6])
+                                                                if (($size21582189 == 7))
+                                                                    then $acc721582189
+                                                                    else {
+                                                                        let $acc821582189 = isSymbolD($acc721582189, $list21582189[7])
+                                                                        if (($size21582189 == 8))
+                                                                            then $acc821582189
+                                                                            else {
+                                                                                let $acc921582189 = isSymbolD($acc821582189, $list21582189[8])
+                                                                                throw("List size exceed 8")
+                                                                                }
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }) + "D"))) + getAmountOrClear((toString({
+        let $list22262257 = genotype
+        let $size22262257 = size($list22262257)
+        let $acc022262257 = 0
+        if (($size22262257 == 0))
+            then $acc022262257
+            else {
+                let $acc122262257 = isSymbolE($acc022262257, $list22262257[0])
+                if (($size22262257 == 1))
+                    then $acc122262257
+                    else {
+                        let $acc222262257 = isSymbolE($acc122262257, $list22262257[1])
+                        if (($size22262257 == 2))
+                            then $acc222262257
+                            else {
+                                let $acc322262257 = isSymbolE($acc222262257, $list22262257[2])
+                                if (($size22262257 == 3))
+                                    then $acc322262257
+                                    else {
+                                        let $acc422262257 = isSymbolE($acc322262257, $list22262257[3])
+                                        if (($size22262257 == 4))
+                                            then $acc422262257
+                                            else {
+                                                let $acc522262257 = isSymbolE($acc422262257, $list22262257[4])
+                                                if (($size22262257 == 5))
+                                                    then $acc522262257
+                                                    else {
+                                                        let $acc622262257 = isSymbolE($acc522262257, $list22262257[5])
+                                                        if (($size22262257 == 6))
+                                                            then $acc622262257
+                                                            else {
+                                                                let $acc722262257 = isSymbolE($acc622262257, $list22262257[6])
+                                                                if (($size22262257 == 7))
+                                                                    then $acc722262257
+                                                                    else {
+                                                                        let $acc822262257 = isSymbolE($acc722262257, $list22262257[7])
+                                                                        if (($size22262257 == 8))
+                                                                            then $acc822262257
+                                                                            else {
+                                                                                let $acc922262257 = isSymbolE($acc822262257, $list22262257[8])
+                                                                                throw("List size exceed 8")
+                                                                                }
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }) + "E"))) + getAmountOrClear((toString({
+        let $list22942325 = genotype
+        let $size22942325 = size($list22942325)
+        let $acc022942325 = 0
+        if (($size22942325 == 0))
+            then $acc022942325
+            else {
+                let $acc122942325 = isSymbolF($acc022942325, $list22942325[0])
+                if (($size22942325 == 1))
+                    then $acc122942325
+                    else {
+                        let $acc222942325 = isSymbolF($acc122942325, $list22942325[1])
+                        if (($size22942325 == 2))
+                            then $acc222942325
+                            else {
+                                let $acc322942325 = isSymbolF($acc222942325, $list22942325[2])
+                                if (($size22942325 == 3))
+                                    then $acc322942325
+                                    else {
+                                        let $acc422942325 = isSymbolF($acc322942325, $list22942325[3])
+                                        if (($size22942325 == 4))
+                                            then $acc422942325
+                                            else {
+                                                let $acc522942325 = isSymbolF($acc422942325, $list22942325[4])
+                                                if (($size22942325 == 5))
+                                                    then $acc522942325
+                                                    else {
+                                                        let $acc622942325 = isSymbolF($acc522942325, $list22942325[5])
+                                                        if (($size22942325 == 6))
+                                                            then $acc622942325
+                                                            else {
+                                                                let $acc722942325 = isSymbolF($acc622942325, $list22942325[6])
+                                                                if (($size22942325 == 7))
+                                                                    then $acc722942325
+                                                                    else {
+                                                                        let $acc822942325 = isSymbolF($acc722942325, $list22942325[7])
+                                                                        if (($size22942325 == 8))
+                                                                            then $acc822942325
+                                                                            else {
+                                                                                let $acc922942325 = isSymbolF($acc822942325, $list22942325[8])
+                                                                                throw("List size exceed 8")
+                                                                                }
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }) + "F"))) + getAmountOrClear((toString({
+        let $list23642395 = genotype
+        let $size23642395 = size($list23642395)
+        let $acc023642395 = 0
+        if (($size23642395 == 0))
+            then $acc023642395
+            else {
+                let $acc123642395 = isSymbolG($acc023642395, $list23642395[0])
+                if (($size23642395 == 1))
+                    then $acc123642395
+                    else {
+                        let $acc223642395 = isSymbolG($acc123642395, $list23642395[1])
+                        if (($size23642395 == 2))
+                            then $acc223642395
+                            else {
+                                let $acc323642395 = isSymbolG($acc223642395, $list23642395[2])
+                                if (($size23642395 == 3))
+                                    then $acc323642395
+                                    else {
+                                        let $acc423642395 = isSymbolG($acc323642395, $list23642395[3])
+                                        if (($size23642395 == 4))
+                                            then $acc423642395
+                                            else {
+                                                let $acc523642395 = isSymbolG($acc423642395, $list23642395[4])
+                                                if (($size23642395 == 5))
+                                                    then $acc523642395
+                                                    else {
+                                                        let $acc623642395 = isSymbolG($acc523642395, $list23642395[5])
+                                                        if (($size23642395 == 6))
+                                                            then $acc623642395
+                                                            else {
+                                                                let $acc723642395 = isSymbolG($acc623642395, $list23642395[6])
+                                                                if (($size23642395 == 7))
+                                                                    then $acc723642395
+                                                                    else {
+                                                                        let $acc823642395 = isSymbolG($acc723642395, $list23642395[7])
+                                                                        if (($size23642395 == 8))
+                                                                            then $acc823642395
+                                                                            else {
+                                                                                let $acc923642395 = isSymbolG($acc823642395, $list23642395[8])
+                                                                                throw("List size exceed 8")
+                                                                                }
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }) + "G"))) + getAmountOrClear((toString({
+        let $list24322463 = genotype
+        let $size24322463 = size($list24322463)
+        let $acc024322463 = 0
+        if (($size24322463 == 0))
+            then $acc024322463
+            else {
+                let $acc124322463 = isSymbolH($acc024322463, $list24322463[0])
+                if (($size24322463 == 1))
+                    then $acc124322463
+                    else {
+                        let $acc224322463 = isSymbolH($acc124322463, $list24322463[1])
+                        if (($size24322463 == 2))
+                            then $acc224322463
+                            else {
+                                let $acc324322463 = isSymbolH($acc224322463, $list24322463[2])
+                                if (($size24322463 == 3))
+                                    then $acc324322463
+                                    else {
+                                        let $acc424322463 = isSymbolH($acc324322463, $list24322463[3])
+                                        if (($size24322463 == 4))
+                                            then $acc424322463
+                                            else {
+                                                let $acc524322463 = isSymbolH($acc424322463, $list24322463[4])
+                                                if (($size24322463 == 5))
+                                                    then $acc524322463
+                                                    else {
+                                                        let $acc624322463 = isSymbolH($acc524322463, $list24322463[5])
+                                                        if (($size24322463 == 6))
+                                                            then $acc624322463
+                                                            else {
+                                                                let $acc724322463 = isSymbolH($acc624322463, $list24322463[6])
+                                                                if (($size24322463 == 7))
+                                                                    then $acc724322463
+                                                                    else {
+                                                                        let $acc824322463 = isSymbolH($acc724322463, $list24322463[7])
+                                                                        if (($size24322463 == 8))
+                                                                            then $acc824322463
+                                                                            else {
+                                                                                let $acc924322463 = isSymbolH($acc824322463, $list24322463[8])
+                                                                                throw("List size exceed 8")
+                                                                                }
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }) + "H")))
+    }
+
+
+func getAssetOrigin (generation) = if ((generation == "G"))
+    then incubatorAddress
+    else breederAddress
+
+
+func getAssetRarity (genotype,generation) = {
+    let quantity = getIntegerValue(Address(getAssetOrigin(generation)), (("stats_" + genotype) + "_quantity"))
+    let power = pow((10000 / quantity), 4, 5, 1, 2, FLOOR)
+    if ((power > 0))
+        then power
+        else 2
+    }
+
+
+func getAssetFarmingPower (assetId) = if (if ((value(assetInfo(assetId)).issuer == Address(breederAddress)))
+    then true
+    else (value(assetInfo(assetId)).issuer == Address(incubatorAddress)))
+    then {
+        let assetName = value(assetInfo(assetId)).name
+        let generation = take(takeRight(assetName, 2), 1)
+        let gen = ((getGen(assetName) + "-") + generation)
+        _Tuple2(gen, getAssetRarity(gen, generation))
+        }
+    else throw("not valid NFT")
+
+
+func getLastKnownAssetFarmingPower (address,assetId) = tryGetInteger((((("address_" + address) + "_asset_") + assetId) + "_farmingPower"))
+
+
+func getAssetsByGen (gen) = {
+    let s = tryGetString(("assets_" + gen))
+    if ((s == ""))
+        then nil
+        else split(s, ",")
+    }
+
+
+func calcInterest (previousInterest,previousInterestHeight,totalFarmingPower) = (previousInterest + (((scale * getRewardPerBlock()) * (height - previousInterestHeight)) / totalFarmingPower))
+
+
+func getCurrentInterest () = if ((tryGetInteger("total_farmingPower") > 0))
+    then {
+        let previousInterest = tryGetInteger("total_lastCheckInterest")
+        let previousInterestHeight = tryGetInteger("total_lastCheckInterestHeight")
+        let totalFarmingPower = tryGetInteger("total_farmingPower")
+        calcInterest(previousInterest, previousInterestHeight, totalFarmingPower)
+        }
+    else if ((tryGetInteger("total_startHeight") != 0))
+        then tryGetInteger("total_lastCheckInterest")
+        else throw("farming is not launched, yet")
+
+
+func calcAssetRewardDelta (address,assetId,assetFarmingPower) = {
+    let lastCheckAssetInterest = tryGetInteger((((("address_" + address) + "_asset_") + assetId) + "_lastCheckInterest"))
+    let currentInterest = getCurrentInterest()
+    (assetFarmingPower * (currentInterest - lastCheckAssetInterest))
+    }
+
+
+func addAssetIdToGenEntry (assetId,assetGen) = {
+    let currentValue = tryGetString((("assets_" + assetGen) + "_locked"))
+    if ((currentValue == ""))
+        then assetId
+        else ((currentValue + ",") + assetId)
+    }
+
+
+func getStakeResult (address,assetId,assetFarmingPower) = {
+    let asset = toBase58String(assetId)
+[IntegerEntry("total_farmingPower", (tryGetInteger("total_farmingPower") + assetFarmingPower)), IntegerEntry("total_lastCheckInterest", getCurrentInterest()), IntegerEntry("total_lastCheckInterestHeight", height), IntegerEntry((((("address_" + address) + "_asset_") + asset) + "_farmingPower"), assetFarmingPower), IntegerEntry((((("address_" + address) + "_asset_") + asset) + "_lastCheckInterest"), getCurrentInterest())]
+    }
+
+
+func getUnstakeResult (address,assetId,rewardDelta,withdrawnAmount,assetFarmingPower) = {
+    let asset = toBase58String(assetId)
+[IntegerEntry("total_farmingPower", (tryGetInteger("total_farmingPower") - assetFarmingPower)), IntegerEntry("total_lastCheckInterest", getCurrentInterest()), IntegerEntry("total_lastCheckInterestHeight", height), IntegerEntry((((("address_" + address) + "_asset_") + asset) + "_farmingPower"), 0), IntegerEntry((((("address_" + address) + "_asset_") + asset) + "_lastCheckInterest"), getCurrentInterest()), IntegerEntry((((("address_" + address) + "_asset_") + asset) + "_withdrawnAmount"), (tryGetInteger((((("address_" + address) + "_asset_") + asset) + "_withdrawnAmount")) + (withdrawnAmount * scale2))), IntegerEntry((((("address_" + address) + "_asset_") + asset) + "_lastCheckFarmedAmount"), (tryGetInteger((((("address_" + address) + "_asset_") + asset) + "_lastCheckFarmedAmount")) + rewardDelta))]
+    }
+
+
+@Callable(i)
+func init () = if ((i.caller != this))
+    then throw("admin only")
+    else [IntegerEntry("total_startHeight", height)]
+
+
+
+@Callable(i)
+func buyPerch (color,refererAddress) = if ((0 > value(indexOf(["B", "R", "G", "Y"], color))))
+    then throw("you need to set color properly")
+    else {
+        let firstPayment = value(i.payments[0])
+        if ((firstPayment.assetId != eggsAssetId))
+            then throw(("You can attach only EGG tokens with the following asset id: " + toBase58String(eggsAssetId)))
+            else if ((firstPayment.amount != perchPrice))
+                then throw(("To buy a perch you currently need the following amount of EGGlets: " + toString(perchPrice)))
+                else {
+                    let refererRewardForPerch = ((firstPayment.amount / 100) * RefererReward)
+                    let refCall = invoke(Address(refContractAddress), "refPayment", [refererAddress], [AttachedPayment(eggsAssetId, refererRewardForPerch)])
+                    if ((refCall == refCall))
+                        then {
+                            let perchAmountKey = ((("address_" + toString(i.caller)) + "_perchesAvailable_") + color)
+                            let perchAmount = tryGetInteger(perchAmountKey)
+[IntegerEntry(perchAmountKey, (perchAmount + 1))]
+                            }
+                        else throw("Strict value is not equal to itself.")
+                    }
+        }
+
+
+
+@Callable(i)
+func stakeNFT () = {
+    let assetId = value(value(i.payments[0]).assetId)
+    let address = toString(i.caller)
+    let color = takeRight(value(assetInfo(assetId)).name, 1)
+    let availablePerches = tryGetInteger(((("address_" + toString(i.caller)) + "_perchesAvailable_") + color))
+    if ((0 >= availablePerches))
+        then throw(("no perches available for the color " + color))
+        else {
+            let $t079808045 = getAssetFarmingPower(assetId)
+            let assetGen = $t079808045._1
+            let assetFarmingPower = $t079808045._2
+            let assetRewardDelta = calcAssetRewardDelta(address, toBase58String(assetId), assetFarmingPower)
+            (getStakeResult(address, assetId, assetFarmingPower) ++ [IntegerEntry(((("address_" + toString(i.caller)) + "_perchesAvailable_") + color), (availablePerches - 1))])
+            }
+    }
+
+
+
+@Callable(i)
+func unstakeNFT (asset) = {
+    let assetId = fromBase58String(asset)
+    let address = toString(i.caller)
+    let assetFarmingPower = getLastKnownAssetFarmingPower(address, asset)
+    let assetRewardDelta = calcAssetRewardDelta(address, asset, assetFarmingPower)
+    let farmedAmount = (assetRewardDelta + tryGetInteger((((("address_" + address) + "_asset_") + asset) + "_lastCheckFarmedAmount")))
+    let withdrawnAmount = tryGetInteger((((("address_" + address) + "_asset_") + asset) + "_withdrawnAmount"))
+    let reward = ((farmedAmount - withdrawnAmount) / (scale * 100))
+    let color = takeRight(value(assetInfo(assetId)).name, 1)
+    if ((0 >= assetFarmingPower))
+        then throw("asset not available")
+        else if ((color == "U"))
+            then throw("use another function to unstake Jackpot NFT")
+            else {
+                let result = getUnstakeResult(address, assetId, assetRewardDelta, reward, assetFarmingPower)
+                (result ++ [IntegerEntry(((("address_" + toString(i.caller)) + "_perchesAvailable_") + color), (tryGetInteger(((("address_" + toString(i.caller)) + "_perchesAvailable_") + color)) + 1)), ScriptTransfer(i.caller, reward, eggsAssetId), ScriptTransfer(i.caller, 1, assetId)])
+                }
+    }
+
+
+
+@Callable(i)
+func stakeJackpot (color) = {
+    let assetId = value(value(i.payments[0]).assetId)
+    let address = toString(i.caller)
+    let availablePerches = tryGetInteger(((("address_" + toString(i.caller)) + "_perchesAvailable_") + color))
+    let assetIssuer = value(assetInfo(assetId)).issuer.bytes
+    if (if ((assetIssuer == incubatorAddress))
+        then true
+        else (assetIssuer == breederAddress))
+        then if ((takeRight(value(value(assetInfo(assetId)).name), 1) != "U"))
+            then throw("jackpot only")
+            else if ((0 >= availablePerches))
+                then throw(("no perches available for the color " + color))
+                else (getStakeResult(address, assetId, 100) ++ [IntegerEntry(((("address_" + toString(i.caller)) + "_perchesAvailable_") + color), (availablePerches - 1)), StringEntry((((("address_" + toString(i.caller)) + "_asset_") + toBase58String(assetId)) + "_perchColor"), color)])
+        else throw("asset is not valid")
+    }
+
+
+
+@Callable(i)
+func unstakeJackpot (asset) = {
+    let assetId = fromBase58String(asset)
+    let address = toString(i.caller)
+    let color = tryGetString((((("address_" + address) + "_asset_") + asset) + "_perchColor"))
+    let assetFarmingPower = getLastKnownAssetFarmingPower(address, asset)
+    let assetRewardDelta = calcAssetRewardDelta(address, asset, assetFarmingPower)
+    let farmedAmount = (assetRewardDelta + tryGetInteger((((("address_" + address) + "_asset_") + asset) + "_lastCheckFarmedAmount")))
+    let withdrawnAmount = tryGetInteger((((("address_" + address) + "_asset_") + asset) + "_withdrawnAmount"))
+    let reward = ((farmedAmount - withdrawnAmount) / (scale * 100))
+    if ((takeRight(value(value(assetInfo(assetId)).name), 1) != "U"))
+        then throw("jackpot only")
+        else if ((assetFarmingPower > 0))
+            then {
+                let result = getUnstakeResult(address, assetId, assetRewardDelta, reward, assetFarmingPower)
+                (result ++ [IntegerEntry(((("address_" + toString(i.caller)) + "_perchesAvailable_") + color), (tryGetInteger(((("address_" + toString(i.caller)) + "_perchesAvailable_") + color)) + 1)), ScriptTransfer(i.caller, reward, eggsAssetId), ScriptTransfer(i.caller, 1, assetId)])
+                }
+            else throw("")
+    }
+
+
+
+@Callable(i)
+func claimReward (asset) = {
+    let address = toString(i.caller)
+    let assetId = fromBase58String(asset)
+    let assetFarmingPower = getLastKnownAssetFarmingPower(address, asset)
+    let assetRewardDelta = calcAssetRewardDelta(address, asset, assetFarmingPower)
+    let farmedAmount = (assetRewardDelta + tryGetInteger((((("address_" + address) + "_asset_") + asset) + "_lastCheckFarmedAmount")))
+    let withdrawnAmount = tryGetInteger((((("address_" + address) + "_asset_") + asset) + "_withdrawnAmount"))
+    let reward = ((farmedAmount - withdrawnAmount) / (scale * 100))
+    if ((0 >= reward))
+        then throw("you have no EGGs to withdraw")
+        else [IntegerEntry((((("address_" + address) + "_asset_") + asset) + "_withdrawnAmount"), (tryGetInteger((((("address_" + address) + "_asset_") + asset) + "_withdrawnAmount")) + (reward * scale2))), ScriptTransfer(Address(fromBase58String(address)), reward, eggsAssetId)]
+    }
+
+
+@Verifier(tx)
+func verify () = sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)

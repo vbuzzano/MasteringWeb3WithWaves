@@ -1,36 +1,41 @@
 /* eslint-disable react/no-unescaped-entities */
-import { accountData } from '@waves/waves-transactions/dist/nodeInteraction'
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import {
-    Menu, BalancePanel, Register, ApprovePurchases,
+    Menu, BalancePanel, Register, PurchasesApprove, PurchasesHistory, WithdrawFunds,
 } from './components'
 import Manager from './components/Manager'
 
-import { FormSupplierRegister, Result } from '../../modal'
-import { Box, Flex, Modal } from '../../shared'
+import { Box } from '../../shared'
 import { connect } from '../../../libs/dApp'
-
-// import { getSupplierAvailableBalance, getSupplierBalance } from '../../../api/helper'
-// import dApp from '../../../libs/dApp'
+import BTCreateCoupon from '../../custom/btCreateCoupon'
 
 const PageSupplier = ({
     account, activeUrl, setActiveUrl,
-}) => {
-    useEffect(() => {
-    }, [account])
-
-    return (
+}) => (
         <>
-            {account.isSupplier ? (
+            {account.isSupplier && activeUrl.indexOf('#supplier/register') === -1 ? (
                 <>
-                <Menu activeUrl={activeUrl} setActiveUrl={setActiveUrl} />
+                <BalancePanel account={account} />
+
+                <div className="alert alert-dark text-center">
+                    <BTCreateCoupon setActiveUrl={setActiveUrl} />
+                </div>
+
+                <Menu
+                    activeUrl={activeUrl}
+                    setActiveUrl={setActiveUrl}
+                    approvalCounter={account?.supplier?.approvalCounter}
+                />
 
                 { account.isConnected ? (
                     <>
-                    {activeUrl.match(new RegExp('.*/?(#supplier[^/]*|#supplier/coupons.*)$')) ? (
+                    {activeUrl.match(new RegExp('.*/?(#supplier[^/]*|#supplier/manage.*)$')) ? (
                         <>
-                        <Box className="alert alert-light text-center">
+                        <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                            <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                             Find here all coupons you have created as supplier..
                             <br />
                             You can add, update and remove them at any time.
@@ -49,10 +54,23 @@ const PageSupplier = ({
                         </>
                     ) : '' }
 
-                    {activeUrl.match(new RegExp('.*/?#supplier/purchases.*$')) ? (
+                    {activeUrl.match(new RegExp('.*/?#supplier/history.*$')) ? (
                         <>
-                        <Box className="alert alert-light text-center">
-                           Find here all the coupons you have sold, and choose for each one if you accept the sale or refuse it
+                        <PurchasesHistory
+                            account={account}
+                            setActiveUrl={setActiveUrl}
+                        />
+                        </>
+                    ) : '' }
+
+                    {activeUrl.match(new RegExp('.*/?#supplier/approve.*$')) ? (
+                        <>
+                        <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                            <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                           Find here all the coupons you have sold, and choose for each one
+                           if you accept the sale or refuse it
                             <br />
                             <small>
                                 <b>
@@ -60,7 +78,28 @@ const PageSupplier = ({
                                 </b>
                             </small>
                         </Box>
-                        <ApprovePurchases
+                        <PurchasesApprove
+                            account={account}
+                            setActiveUrl={setActiveUrl}
+                        />
+                        </>
+                    ) : '' }
+
+                    {activeUrl.match(new RegExp('.*/?#supplier/withdraw.*$')) ? (
+                        <>
+                        <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                            <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            Withdraw available funds for expired/burned coupons.
+                            <br />
+                            <small>
+                                <b>
+                                click on "Withdraw Funds" for any coupon to received funds
+                                </b>
+                            </small>
+                        </Box>
+                        <WithdrawFunds
                             account={account}
                             setActiveUrl={setActiveUrl}
                         />
@@ -69,13 +108,16 @@ const PageSupplier = ({
 
                     {activeUrl.match(new RegExp('.*/?#supplier/burn.*$')) ? (
                         <>
-                        <Box className="alert alert-light text-center">
-                            Find here all the coupons you received in return from the buyers,
-                            and burn them to recover your balance.
+                        <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                            <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            Find here all the coupons you received in return from buyers,
+                            and burn them to release funds.
                             <br />
                             <small>
                                 <b>
-                                click on any coupon and then on "Burn" to burn it
+                                click "Burn" button on any coupon burn it and release funds.
                                 </b>
                             </small>
                         </Box>
@@ -93,8 +135,7 @@ const PageSupplier = ({
 
             <Register account={account} />
         </>
-    )
-}
+)
 
 export default PageSupplier
 

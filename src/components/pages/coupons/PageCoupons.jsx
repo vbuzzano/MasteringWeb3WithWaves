@@ -1,83 +1,85 @@
 /* eslint-disable react/no-unescaped-entities */
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
 import { Menu, MyCoupons, MyPurchases } from './components'
+import UsedCoupons from './components/UsedCoupons'
 
-import { Flex } from '../../shared'
-import { subscribe, DATA } from '../../../libs/dApp'
-import { fetchUserPurchases, fetchUserActiveCoupons } from '../../../api'
+import { connect } from '../../../libs/dApp'
+import { Box } from '../../shared'
 
 const PageCoupons = ({
     account, activeUrl, setActiveUrl,
-}) => {
-    const [loading, setLoading] = useState(false)
-    const [coupons, updateCoupons] = useState([])
-    const [purchases, updatePurchases] = useState([])
-
-    const refreshCoupons = async () => {
-        let list = []
-        setLoading(true)
-        try {
-            list = await fetchUserActiveCoupons(account.address)
-            console.debug('[ 🔄 Coupons ] :', `${list.length} coupons loaded`)
-            updateCoupons(list)
-
-            list = await fetchUserPurchases(account.address)
-            console.debug('[ 🔄 Coupons ] :', `${list.length} purchased loaded`)
-            updatePurchases(list)
-        } catch (error) {
-            console.error(error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    useEffect(() => subscribe(DATA, refreshCoupons), [account])
-
-    return (
+}) => (
         <>
-            <Menu activeUrl={activeUrl} setActiveUrl={setActiveUrl} />
-            {activeUrl.match(new RegExp('.*/?(#my[^/]*|#my/coupons.*)$'))
-                ? (
-                    <>
-                    <div className="alert alert-light text-center">
-                        Find here all your coupons and their validity period.
-                        <br />
-                        You can use them at any time by transferring them to
-                        the respective supplier in order to get your purchase advantage.
-                        <br />
-                        <small>
-                            <b>
-                            click on the coupon of your choice,
-                            then on "use" to activate the transfer to its supplier
-                            </b>
-                        </small>
-                    </div>
-                    <MyCoupons
-                        loading={loading}
-                        coupons={coupons}
-                    />
-                    </>
-                ) : ''
-            }
+            {account.isConnected ? (
+                <>
+                    <Menu activeUrl={activeUrl} setActiveUrl={setActiveUrl} />
+                    {activeUrl.match(new RegExp('.*/?(#my[^/]*|#my/coupons.*)$'))
+                        ? (
+                            <>
+                            <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                                <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                Find here all your coupons and their validity period.
+                                <br />
+                                You can use them at any time by transferring them to
+                                the respective supplier in order to get your purchase advantage.
+                                <br />
+                                <small>
+                                    <b>
+                                    click on the coupon of your choice,
+                                    then on "use" to activate the transfer to its supplier
+                                    </b>
+                                </small>
+                            </Box>
+                            <MyCoupons account={account} setActiveUrl={setActiveUrl} />
+                            </>
+                        ) : ''
+                    }
 
-            {activeUrl.match(new RegExp('.*/?#my/purchases.*$'))
-                ? (
-                    <>
-                    <div className="alert alert-light text-center">
-                            Find here all your purchases and the supplier approval status
-                        <br />
-                        <small>(Waiting approval, Rejected or Accepted)</small>
-                    </div>
-                    <MyPurchases
-                        loading={loading}
-                        purchases={purchases}
-                    />
-                    </>
-                ) : ''
-            }
+                    {activeUrl.match(new RegExp('.*/?#my/used.*$'))
+                        ? (
+                            <>
+                            <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                                <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                    Find here all used coupons
+                                <br />
+                            </Box>
+                            <UsedCoupons account={account} setActiveUrl={setActiveUrl} />
+                            </>
+                        ) : ''
+                    }
+
+                    {activeUrl.match(new RegExp('.*/?#my/purchases.*$'))
+                        ? (
+                            <>
+                            <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                                <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                    Find here all your purchases and the supplier approval status
+                                <br />
+                                <small>(Waiting approval, Rejected or Accepted)</small>
+                            </Box>
+                            <MyPurchases account={account} setActiveUrl={setActiveUrl} />
+                            </>
+                        ) : ''
+                    }
+
+                </>
+            ) : (
+                <>
+                    <Box className="alert alert-warning text-center">
+                        <p>To see your coupons and use them, please login</p>
+                        <p><button className="btn btn-primary" type="button" onClick={connect}>Login</button></p>
+                    </Box>
+
+                </>
+            )}
         </>
-    )
-}
+)
 
 export default PageCoupons

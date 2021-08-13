@@ -235,26 +235,31 @@ describe('Coupon Bazaar test suite', async () => {
             throw Error('User cannot purchase expired coupon')
         } catch (err) { true }
 
+        // purchases 1
         tx = invokeScript(getItemPurchaseData(itemIds[1], 2000), accounts.user0)
         await broadcast(tx)
         res = await waitForTx(tx.id)
         purchaseIds.push(res.stateChanges.data[1].key.match(/purchase_[^_]+/g)[0])
 
+        // purchase 2
         tx = invokeScript(getItemPurchaseData(itemIds[1], 2000), accounts.user1)
         await broadcast(tx)
         res = await waitForTx(tx.id)
         purchaseIds.push(res.stateChanges.data[1].key.match(/purchase_[^_]+/g)[0])
 
+        // purchase  3
         tx = invokeScript(getItemPurchaseData(itemIds[2], 3000), accounts.user2)
         await broadcast(tx)
         res = await waitForTx(tx.id)
         purchaseIds.push(res.stateChanges.data[1].key.match(/purchase_[^_]+/g)[0])
 
+        // purchase 4
         tx = invokeScript(getItemPurchaseData(itemIds[1], 2000), accounts.user0)
         await broadcast(tx)
         res = await waitForTx(tx.id)
         purchaseIds.push(res.stateChanges.data[1].key.match(/purchase_[^_]+/g)[0])
 
+        // purchase 5
         tx = invokeScript(getItemPurchaseData(itemIds[2], 3000), accounts.user0)
         await broadcast(tx)
         res = await waitForTx(tx.id)
@@ -293,14 +298,16 @@ describe('Coupon Bazaar test suite', async () => {
                 fee: 500000,
             }
         }
-        let tx = null
+        let tx = null; let res = null; let balance = 0
         // gen nft for purchase 1
         tx = issue(issueNFT('Coupon 1'), accounts.supplier1)
         await broadcast(tx) && await waitForTx(tx.id)
         nftIds.push(tx.id)
         // accept purchase 1
         tx = invokeScript(getAcceptTxData(purchaseIds[0], nftIds[0]), accounts.supplier1)
-        await broadcast(tx) && await waitForTx(tx.id)
+        res = await broadcast(tx) && await waitForTx(tx.id)
+        balance = parseInt(res.stateChanges.data[4].value, 10)
+        assert(balance === 2000)
         // and transfer nft 1 to user 0
         tx = transfer(
             getTransferTxData(address(accounts.user0), 1, nftIds[0], 0.05 * 1e8),
@@ -314,7 +321,9 @@ describe('Coupon Bazaar test suite', async () => {
         nftIds.push(tx.id)
         // accept purchase 2
         tx = invokeScript(getAcceptTxData(purchaseIds[1], nftIds[1]), accounts.supplier1)
-        await broadcast(tx) && await waitForTx(tx.id)
+        res = await broadcast(tx) && await waitForTx(tx.id)
+        balance = parseInt(res.stateChanges.data[4].value, 10)
+        assert(balance === 4000)
         // and transfer nft 2 to user 1
         tx = transfer(
             getTransferTxData(address(accounts.user1), 1, nftIds[1], 0.05 * 1e8),
@@ -328,7 +337,9 @@ describe('Coupon Bazaar test suite', async () => {
         nftIds.push(tx.id)
         // accept purchase 2
         tx = invokeScript(getAcceptTxData(purchaseIds[2], nftIds[2]), accounts.supplier1)
-        await broadcast(tx) && await waitForTx(tx.id)
+        res = await broadcast(tx) && await waitForTx(tx.id)
+        balance = parseInt(res.stateChanges.data[4].value, 10)
+        assert(balance === 7000)
         // and transfer nft 2 to user 1
         tx = transfer(
             getTransferTxData(address(accounts.user2), 1, nftIds[2], 0.05 * 1e8),
@@ -342,7 +353,9 @@ describe('Coupon Bazaar test suite', async () => {
         nftIds.push(tx.id)
         // accept purchase 4
         tx = invokeScript(getAcceptTxData(purchaseIds[3], nftIds[3]), accounts.supplier1)
-        await broadcast(tx) && await waitForTx(tx.id)
+        res = await broadcast(tx) && await waitForTx(tx.id)
+        balance = parseInt(res.stateChanges.data[4].value, 10)
+        assert(balance === 9000)
         // and transfer nft 4 to user 0
         tx = transfer(
             getTransferTxData(address(accounts.user0), 1, nftIds[3], 0.05 * 1e8),
@@ -381,7 +394,7 @@ describe('Coupon Bazaar test suite', async () => {
         await waitForTx(tx.id)
     })
 
-    it('Supplier can withdraw price amount from burned coupon', async () => {
+    it('Supplier can withdraw funds (price amount) from burned coupon', async () => {
         const tx = invokeScript({
             dApp: address(accounts.dApp),
             call: {
@@ -396,7 +409,7 @@ describe('Coupon Bazaar test suite', async () => {
         await broadcast(tx) && await waitForTx(tx.id)
     })
 
-    it('Supplier can withdraw price amount from expire coupon', async () => {
+    it('Supplier can withdraw funds (price amount) from expire coupon', async () => {
         let tx = null
         // expire item 1
         tx = invokeScript(getUpdateTxData(itemIds[1], 'Coupon 2', 2000, '2019-12-31'), accounts.supplier1)
@@ -417,7 +430,7 @@ describe('Coupon Bazaar test suite', async () => {
         await broadcast(tx) && await waitForTx(tx.id)
     })
 
-    it('Supplier can burn coupon via dApp and to increase available balance', async () => {
+    it('Supplier can burn coupon via dApp and to withdraw available funds', async () => {
         const ts = invokeScript({
             dApp: address(accounts.dApp),
             call: {
@@ -429,20 +442,6 @@ describe('Coupon Bazaar test suite', async () => {
                 amount: 1,
                 assetId: nftIds[2],
             }],
-        }, accounts.supplier1)
-        const tx = await broadcast(ts)
-        await waitForTx(tx.id)
-    })
-
-    it('Supplier should be able to withdraw available balance after burned coupons via dApp', async () => {
-        const ts = invokeScript({
-            dApp: address(accounts.dApp),
-            call: {
-                function: 'withdrawAvailable',
-                args: [],
-            },
-            fee: 500000,
-            payment: [],
         }, accounts.supplier1)
         const tx = await broadcast(ts)
         await waitForTx(tx.id)
@@ -493,7 +492,7 @@ describe('Coupon Bazaar test suite', async () => {
         await revealVote(itemIds[2], votes[2], salts[2], accounts.user2)
     })
 
-    it('Supplier can remove purchased and used coupon by setting it as removed', async () => {
+    it('Supplier can remove coupon by setting it as removed when purchased or used ', async () => {
         const tx = invokeScript({
             dApp: address(accounts.dApp),
             call: {

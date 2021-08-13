@@ -1,20 +1,27 @@
 import React from 'react'
 
 import { UserIcon } from '../layout/header-controls'
-import { connect, disconnect } from '../../libs/dApp'
+import { connect, disconnect, shortAddress } from '../../libs/dApp'
+import { Box } from '../shared'
 
-const BTLogin = ({ account }) => (
+const BTLogin = ({ account, setActiveUrl }) => (
         <>
             {account?.isConnected
                 ? (
-                    <button type="submit" onClick={disconnect}>
-                        <UserIcon />
-                        &nbsp;
-                        {`${account.address.substr(0, 4)}...${account.address.substr(account?.address.length - 5, 4)}`}
-                    </button>
+                    <div className="btn-group mr-2" role="group" aria-label="Logout">
+                        <Box className="btn btn-dark" onClick={() => { setActiveUrl('#my') }}>
+                            <a href="#my" className="text-light">
+                                <span style={{ position: 'relative', top: '-3px', left: '-4px' }}><UserIcon /></span>
+                                {account.name || ` ${shortAddress(account.address)}`}
+                            </a>
+                        </Box>
+                        <button className="btn btn-primary" type="submit" onClick={disconnect}>
+                            Logout
+                        </button>
+                    </div>
                 )
                 : (
-                    <button type="submit" onClick={connect}>
+                    <button className="btn btn-primary" type="submit" onClick={connect}>
                         Login
                     </button>
                 )

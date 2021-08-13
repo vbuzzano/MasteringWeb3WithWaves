@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 import React, { useEffect } from 'react'
 
 import { FormSupplierRegister, Result } from '../../../modal'
@@ -27,10 +28,15 @@ function Register({ account }) {
                         onFormClose()
                     }}
                     onSubmit={async (data) => {
-                        await registerSupplier(data)
-                        // onAccountChange()
-                        onFormClose()
-                        onResultOpen()
+                        try {
+                            await registerSupplier(data)
+                            // onAccountChange()
+                            onFormClose()
+                            onResultOpen()
+                        } catch (error) {
+                            alert(error.message)
+                            console.error(error)
+                        }
                     }}
                 />
             ) : '' }

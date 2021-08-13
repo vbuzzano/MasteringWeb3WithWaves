@@ -21,7 +21,7 @@ import {
 import { Modal } from './components/shared'
 import { Header } from './containers'
 import {
-    fetchData, subscribe, ACCOUNT, DEFAULT_ACCOUNT,
+    subscribe, ACCOUNT, DEFAULT_ACCOUNT,
 } from './libs/dApp'
 import { PageMarket, PageCoupons, PageSupplier } from './components/pages'
 
@@ -48,8 +48,6 @@ const App = () => {
         resultSR: [resultSROpened, onResultSROpen, onResultSRClose],
         formSR: [formSROpened, onFormSROpen, onFormSRClose],
     } = useSupplierRegisterDialogs()
-
-    const [supplierApprovalCounter, setSupplierApprovalCounter] = useState(0)
 
     const [supplierLockedBalance, setSupplierLockedBalance] = useState(0)
     const [supplierAvailableBalance, setSupplierAvailableBalance] = useState(0)
@@ -179,307 +177,301 @@ const App = () => {
         }
     }, [])
 
-    // refresh data
-    useEffect(() => {
-        console.debug('App: refresh DATA')
-        fetchData()
-    }, [account])
-
     return (
         <>
             <Header
                 account={account}
                 activeUrl={activeUrl}
                 setActiveUrl={setActiveUrl}
-                // supplierApprovalCounter={supplierApprovalCounter}
                 // onAccountChange={fetchData}
                 // onSupplierRegister={onSupplierRegister}
                 // onCreateCoupon={onFormOpen}
                 // filterActive={filterActive}
                 // onChangeFilterState={changeFilterState}
             />
+            <div className="container-fluid mt-md-3">
+                { activeUrl?.indexOf('#market') >= 0
+                    ? (
+                        <PageMarket
+                            account={account}
+                            setActiveUrl={setActiveUrl}
+                        />
+                    ) : '' }
 
-            { activeUrl?.indexOf('#market') >= 0
-                ? (
-                    <PageMarket
-                        account={account}
-                        setActiveUrl={setActiveUrl}
-                    />
-                ) : '' }
+                { activeUrl?.indexOf('#my') >= 0
+                    ? (
+                        <PageCoupons
+                            account={account}
+                            activeUrl={activeUrl}
+                            setActiveUrl={setActiveUrl}
+                        />
+                    ) : '' }
 
-            { activeUrl?.indexOf('#my') >= 0 && account.isConnected
-                ? (
-                    <PageCoupons
-                        account={account}
-                        activeUrl={activeUrl}
-                        setActiveUrl={setActiveUrl}
-                    />
-                ) : '' }
+                { activeUrl?.indexOf('#supplier') >= 0
+                    ? (
+                        <PageSupplier
+                            account={account}
+                            activeUrl={activeUrl}
+                            setActiveUrl={setActiveUrl}
+                        />
+                    ) : '' }
 
-            { activeUrl?.indexOf('#supplier') >= 0
-                ? (
-                    <PageSupplier
-                        account={account}
-                        activeUrl={activeUrl}
-                        setActiveUrl={setActiveUrl}
-                    />
-                ) : '' }
-
-            <Modal open={loading}>
-                <div style={{ height: '100%', marginTop: '100px' }}>
-                    <div className="spinner-border text-primary" role="status">
-                                        Loading...
-                        <span className="sr-only">...</span>
+                <Modal open={loading}>
+                    <div style={{ height: '100%', marginTop: '100px' }}>
+                        <div className="spinner-border text-primary" role="status">
+                                            Loading...
+                            <span className="sr-only">...</span>
+                        </div>
                     </div>
-                </div>
-            </Modal>
+                </Modal>
+            </div>
         </>
 
     /*
-          { activeUrl === '#market'
-                    ? (
-                        <>
-                            <div className="alert alert-light text-center">
-Find coupons in the bazaar market, and start saving money.
-                                <br />
-                                {' '}
-Thanks to the many discount coupons from our suppliers
-                                <br />
-                                <small><b>click on the coupon of your choice, then on 'Buy' to buy it</b></small>
-                            </div>
-                            <Flex
-                                justifyContent="center"
-                                p={{
-                                    0: '10px',
-                                    md: '0px',
-                                }}
-                                flexWrap="wrap"
-                            >
-                                <Coupons
-                                    setActiveUrl={setActiveUrl}
-                                    isManageCoupons={false}
-                                    onDialogOpen={onDialogOpen}
-                                    coupons={filterActive ? userCoupons : items}
-                                />
-                            </Flex>
-                        </>
-                    )
-                    : '' }
-
-    /*
-                <Manager
-                    supplier={supplier}
-                    activeUrl={activeUrl}
-                    setActiveUrl={setActiveUrl}
-                />
-
-                {account.address}
-
-                { activeUrl.indexOf('#coupons') >= 0
-                    ? (
-                        <ul className="nav nav-tabs">
-                            <li className="nav-item" onClick={() => setActiveUrl('#coupons/my')}>
-                                <a className={activeUrl.indexOf('#coupons/my') >= 0 ? 'nav-link active' : 'nav-link'} href="#coupons/my">My Coupons</a>
-                            </li>
-                            <li className="nav-item" onClick={() => setActiveUrl('#coupons/purchases')}>
-                                <a className={activeUrl.indexOf('#coupons/purchases') >= 0 ? 'nav-link active' : 'nav-link'} href="#coupons/purchases">My Purchases</a>
-                            </li>
-                        </ul>
-                    )
-                    : ''
-                }
-
-                { activeUrl.indexOf('#coupons/my') >= 0
-                    ? (
-                        <div>
-                            <div className="alert alert-light text-center">
-Find here all your coupons and their validity period.
-                                <br />
-You can use them at any time by transferring them to the respective supplier in order to get your purchase advantage.
-                                <br />
-                                <small><b>click on the coupon of your choice, then on 'use' to activate the transfer to its supplier</b></small>
-                            </div>
-                            <Flex
-                                justifyContent="center"
-                                p={{
-                                    0: '10px',
-                                    md: '0px',
-                                }}
-                                flexWrap="wrap"
-                            >
-                                <Coupons
-                                    setActiveUrl={setActiveUrl}
-                                    isManageCoupons={false}
-                                    onDialogOpen={onDialogOpen}
-                                    coupons={userCoupons}
-                                />
-                            </Flex>
-                        </div>
-                    )
-                    : ''
-                }
-
-                { activeUrl.indexOf('#coupons/purchases') >= 0
-                    ? (
-                        <div>
-                            <div className="alert alert-light text-center">
-Find here all your purchases and the supplier approval status
-                                <br />
-                                <small>(Waiting approval, Rejected or Accepted)</small>
-                            </div>
-                            <Purchases
-                                isManage={false}
-                                purchases={purchasesUser}
-                                setActiveUrl={setActiveUrl}
-                            />
-                        </div>
-                    )
-                    : ''
-                }
-
-                { activeUrl.indexOf('#manage2') >= 0
-                    ? (
-                        <>
-                            <div className="alert alert-light">
-                                <div className="row">
-                                    <div className="col-10">
-                                        <big>
-                                            <span className="badge badge-secondary">
-        Your Balance
-                                                {' '}
-                                                { supplierBalance }
-                                                {' '}
-        WAVES
-                                            </span>
-                                        </big>
-        &nbsp;&nbsp;
-                                        <big>
-                                            <span className="badge badge-secondary">
-        Locked
-                                                {' '}
-                                                { supplierLockedBalance }
-                                                {' '}
-        WAVES
-                                            </span>
-                                        </big>
-        &nbsp;&nbsp;
-                                        <big>
-                                            <span className="badge badge-secondary">
-        Available
-                                                {' '}
-                                                { supplierAvailableBalance }
-                                                {' '}
-        WAVES
-                                            </span>
-                                        </big>
-                                    </div>
-                                    <div className="col-2 text-right">
-                                        <button
-                                            type="button"
-                                            className="btn btn-success"
-                                            onClick={async () => {
-                                                await withdrawAvailable()
-                                                fetchData()
-                                                alert('Withdrawal successful')
-                                            }}
-                                        >
-                                            Withdraw Available
-                                        </button>
-                                    </div>
+            { activeUrl === '#market'
+                        ? (
+                            <>
+                                <div className="alert alert-light text-center">
+    Find coupons in the bazaar market, and start saving money.
+                                    <br />
+                                    {' '}
+    Thanks to the many discount coupons from our suppliers
+                                    <br />
+                                    <small><b>click on the coupon of your choice, then on 'Buy' to buy it</b></small>
                                 </div>
-                            </div>
+                                <Flex
+                                    justifyContent="center"
+                                    p={{
+                                        0: '10px',
+                                        md: '0px',
+                                    }}
+                                    flexWrap="wrap"
+                                >
+                                    <Coupons
+                                        setActiveUrl={setActiveUrl}
+                                        isManageCoupons={false}
+                                        onDialogOpen={onDialogOpen}
+                                        coupons={filterActive ? userCoupons : items}
+                                    />
+                                </Flex>
+                            </>
+                        )
+                        : '' }
+
+        /*
+                    <Manager
+                        supplier={supplier}
+                        activeUrl={activeUrl}
+                        setActiveUrl={setActiveUrl}
+                    />
+
+                    {account.address}
+
+                    { activeUrl.indexOf('#coupons') >= 0
+                        ? (
                             <ul className="nav nav-tabs">
-                                <li className="nav-item" onClick={() => setActiveUrl('#manage/coupons')}>
-                                    <a className={activeUrl.indexOf('#manage/coupons') >= 0 ? 'nav-link active' : 'nav-link'} href="#manage/coupons">Selling Coupons</a>
+                                <li className="nav-item" onClick={() => setActiveUrl('#coupons/my')}>
+                                    <a className={activeUrl.indexOf('#coupons/my') >= 0 ? 'nav-link active' : 'nav-link'} href="#coupons/my">My Coupons</a>
                                 </li>
-                                <li className="nav-item" onClick={() => setActiveUrl('#manage/approve')}>
-                                    <a className={activeUrl.indexOf('#manage/approve') >= 0 ? 'nav-link active' : 'nav-link'} href="#manage/approve">Approve Purchases</a>
-                                </li>
-                                <li className="nav-item" onClick={() => setActiveUrl('#manage/burn')}>
-                                    <a className={activeUrl.indexOf('#manage/burn') >= 0 ? 'nav-link active' : 'nav-link'} href="#manage/burn">Burn Received Coupons</a>
+                                <li className="nav-item" onClick={() => setActiveUrl('#coupons/purchases')}>
+                                    <a className={activeUrl.indexOf('#coupons/purchases') >= 0 ? 'nav-link active' : 'nav-link'} href="#coupons/purchases">My Purchases</a>
                                 </li>
                             </ul>
-                        </>
-                    )
-                    : ''
-                }
-                { activeUrl.indexOf('#manage2/coupons') >= 0
-                    ? (
-                        <>
-                            <div className="alert alert-light text-center">
-Find here all coupons you have created as supplier..
-                                <br />
-You can add, update and remove them at any time.
-                                <br />
-                                <small><b>click on "Add New Coupon" to create a new coupon | click on any coupon and then on "Edit" to update it or "Remove" to remove it from Market</b></small>
-                            </div>
-                            <div className="alert alert-dark text-center">
-                                <button type="submit" className="btn btn-primary" onClick={onFormOpen}>Add New Coupon</button>
-                            </div>
-                            <Flex
-                                justifyContent="center"
-                                p={{
-                                    0: '10px',
-                                    md: '0px',
-                                }}
-                                flexWrap="wrap"
-                            >
-                                <Coupons
-                                    setActiveUrl={setActiveUrl}
-                                    isManageCoupons
-                                    onDialogOpen={onDialogOpen}
-                                    coupons={supplierItems}
-                                />
-                            </Flex>
-                        </>
-                    )
-                    : '' }
+                        )
+                        : ''
+                    }
 
-                { activeUrl === '#manage2/approve'
-                    ? (
-                        <div>
-                            <div className="alert alert-light text-center">
-Find here all the coupons you have sold, and choose for each one if you accept the sale or refuse it
-                                <br />
-                                <small><b>click on "Reject" to refuse or "Accept" to accept the sale</b></small>
+                    { activeUrl.indexOf('#coupons/my') >= 0
+                        ? (
+                            <div>
+                                <div className="alert alert-light text-center">
+    Find here all your coupons and their validity period.
+                                    <br />
+    You can use them at any time by transferring them to the respective supplier in order to get your purchase advantage.
+                                    <br />
+                                    <small><b>click on the coupon of your choice, then on 'use' to activate the transfer to its supplier</b></small>
+                                </div>
+                                <Flex
+                                    justifyContent="center"
+                                    p={{
+                                        0: '10px',
+                                        md: '0px',
+                                    }}
+                                    flexWrap="wrap"
+                                >
+                                    <Coupons
+                                        setActiveUrl={setActiveUrl}
+                                        isManageCoupons={false}
+                                        onDialogOpen={onDialogOpen}
+                                        coupons={userCoupons}
+                                    />
+                                </Flex>
                             </div>
-                            <Purchases
-                                isManage
-                                purchases={purchasesSupplier}
-                                setActiveUrl={setActiveUrl}
-                                onAccept={onAcceptPurchase}
-                                onReject={onRejectPurchase}
-                            />
-                        </div>
-                    )
-                    : '' }
+                        )
+                        : ''
+                    }
 
-                { activeUrl.indexOf('#manage2/burn') >= 0
-                    ? (
-                        <>
-                            <div className="alert alert-light text-center">
-Find here all the coupons you received in return from the buyers, and burn them to recover your balance.
-                                <br />
-                                <small><b>click on any coupon and then on "Burn" to burn it</b></small>
-                            </div>
-                            <Flex
-                                justifyContent="center"
-                                p={{
-                                    0: '10px',
-                                    md: '0px',
-                                }}
-                                flexWrap="wrap"
-                            >
-                                <Coupons
+                    { activeUrl.indexOf('#coupons/purchases') >= 0
+                        ? (
+                            <div>
+                                <div className="alert alert-light text-center">
+    Find here all your purchases and the supplier approval status
+                                    <br />
+                                    <small>(Waiting approval, Rejected or Accepted)</small>
+                                </div>
+                                <Purchases
+                                    isManage={false}
+                                    purchases={purchasesUser}
                                     setActiveUrl={setActiveUrl}
-                                    isManageCoupons
-                                    onDialogOpen={onDialogOpen}
-                                    coupons={supplierReceivedItems}
                                 />
-                            </Flex>
-                        </>
-                    )
-                    : '' }
+                            </div>
+                        )
+                        : ''
+                    }
+
+                    { activeUrl.indexOf('#manage2') >= 0
+                        ? (
+                            <>
+                                <div className="alert alert-light">
+                                    <div className="row">
+                                        <div className="col-10">
+                                            <big>
+                                                <span className="badge badge-secondary">
+            Your Balance
+                                                    {' '}
+                                                    { supplierBalance }
+                                                    {' '}
+            WAVES
+                                                </span>
+                                            </big>
+            &nbsp;&nbsp;
+                                            <big>
+                                                <span className="badge badge-secondary">
+            Locked
+                                                    {' '}
+                                                    { supplierLockedBalance }
+                                                    {' '}
+            WAVES
+                                                </span>
+                                            </big>
+            &nbsp;&nbsp;
+                                            <big>
+                                                <span className="badge badge-secondary">
+            Available
+                                                    {' '}
+                                                    { supplierAvailableBalance }
+                                                    {' '}
+            WAVES
+                                                </span>
+                                            </big>
+                                        </div>
+                                        <div className="col-2 text-right">
+                                            <button
+                                                type="button"
+                                                className="btn btn-success"
+                                                onClick={async () => {
+                                                    await withdrawAvailable()
+                                                    fetchData()
+                                                    alert('Withdrawal successful')
+                                                }}
+                                            >
+                                                Withdraw Available
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ul className="nav nav-tabs">
+                                    <li className="nav-item" onClick={() => setActiveUrl('#manage/coupons')}>
+                                        <a className={activeUrl.indexOf('#manage/coupons') >= 0 ? 'nav-link active' : 'nav-link'} href="#manage/coupons">Selling Coupons</a>
+                                    </li>
+                                    <li className="nav-item" onClick={() => setActiveUrl('#manage/approve')}>
+                                        <a className={activeUrl.indexOf('#manage/approve') >= 0 ? 'nav-link active' : 'nav-link'} href="#manage/approve">Approve Purchases</a>
+                                    </li>
+                                    <li className="nav-item" onClick={() => setActiveUrl('#manage/burn')}>
+                                        <a className={activeUrl.indexOf('#manage/burn') >= 0 ? 'nav-link active' : 'nav-link'} href="#manage/burn">Burn Received Coupons</a>
+                                    </li>
+                                </ul>
+                            </>
+                        )
+                        : ''
+                    }
+                    { activeUrl.indexOf('#manage2/coupons') >= 0
+                        ? (
+                            <>
+                                <div className="alert alert-light text-center">
+    Find here all coupons you have created as supplier..
+                                    <br />
+    You can add, update and remove them at any time.
+                                    <br />
+                                    <small><b>click on "Add New Coupon" to create a new coupon | click on any coupon and then on "Edit" to update it or "Remove" to remove it from Market</b></small>
+                                </div>
+                                <div className="alert alert-dark text-center">
+                                    <button type="submit" className="btn btn-primary" onClick={onFormOpen}>Add New Coupon</button>
+                                </div>
+                                <Flex
+                                    justifyContent="center"
+                                    p={{
+                                        0: '10px',
+                                        md: '0px',
+                                    }}
+                                    flexWrap="wrap"
+                                >
+                                    <Coupons
+                                        setActiveUrl={setActiveUrl}
+                                        isManageCoupons
+                                        onDialogOpen={onDialogOpen}
+                                        coupons={supplierItems}
+                                    />
+                                </Flex>
+                            </>
+                        )
+                        : '' }
+
+                    { activeUrl === '#manage2/approve'
+                        ? (
+                            <div>
+                                <div className="alert alert-light text-center">
+    Find here all the coupons you have sold, and choose for each one if you accept the sale or refuse it
+                                    <br />
+                                    <small><b>click on "Reject" to refuse or "Accept" to accept the sale</b></small>
+                                </div>
+                                <Purchases
+                                    isManage
+                                    purchases={purchasesSupplier}
+                                    setActiveUrl={setActiveUrl}
+                                    onAccept={onAcceptPurchase}
+                                    onReject={onRejectPurchase}
+                                />
+                            </div>
+                        )
+                        : '' }
+
+                    { activeUrl.indexOf('#manage2/burn') >= 0
+                        ? (
+                            <>
+                                <div className="alert alert-light text-center">
+    Find here all the coupons you received in return from the buyers, and burn them to recover your balance.
+                                    <br />
+                                    <small><b>click on any coupon and then on "Burn" to burn it</b></small>
+                                </div>
+                                <Flex
+                                    justifyContent="center"
+                                    p={{
+                                        0: '10px',
+                                        md: '0px',
+                                    }}
+                                    flexWrap="wrap"
+                                >
+                                    <Coupons
+                                        setActiveUrl={setActiveUrl}
+                                        isManageCoupons
+                                        onDialogOpen={onDialogOpen}
+                                        coupons={supplierReceivedItems}
+                                    />
+                                </Flex>
+                            </>
+                        )
+                        : '' }
 
                 <Modal open={formSROpened} onClose={onFormSRClose}>
                     <FormSupplierRegister

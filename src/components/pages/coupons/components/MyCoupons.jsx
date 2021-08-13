@@ -1,16 +1,36 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { Flex, Modal } from '../../../shared'
 import { Coupons } from '../../../../containers'
 import { Dialog, Result } from '../../../modal'
 import { useAppDialogs } from '../../../service'
+import {
+    DATA, fetchUserActiveCoupons, sendCouponToSupplier, subscribe,
+} from '../../../../libs/dApp'
 
-const MyCoupons = ({ loading, coupons }) => {
+const MyCoupons = ({ account, setActiveUrl }) => {
     const {
         selectedItem,
         dialog: [dialogOpened, onDialogOpen, onDialogClose],
         result: [resultOpened, onResultOpen, onResultClose],
     } = useAppDialogs()
+    const [loading, setLoading] = useState(false)
+    const [coupons, updateCoupons] = useState(false)
+    const { address } = account
+
+    useEffect(() => {
+        async function refreshData() {
+            try {
+                const list = await fetchUserActiveCoupons(address)
+                console.debug('[ 🔄 My Coupons ] :', `${list.length} coupons loaded`)
+                updateCoupons(list)
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
+        return subscribe(DATA, refreshData)
+    }, [address])
 
     return (
         <>
@@ -26,19 +46,28 @@ const MyCoupons = ({ loading, coupons }) => {
                     loading={loading}
                     coupons={coupons}
                     onDialogOpen={onDialogOpen}
+                    setActiveUrl={setActiveUrl}
                 />
             </Flex>
 
             <Modal open={dialogOpened} onClose={onDialogClose}>
                 <Dialog
+                    buttons={['buymore', 'use']}
                     coupon={selectedItem}
                     onClose={onDialogClose}
                     onResultOpen={onResultOpen}
-                    buttons={{
-                        use: {
-                            title: 'Use',
-                            onClick: () => 'click',
-                        },
+                    onUse={async () => {
+                        setLoading(true)
+                        try {
+                            await sendCouponToSupplier(selectedItem)
+                            onDialogClose()
+                            onResultOpen()
+                        } catch (error) {
+                            alert(error.message)
+                            console.log(error)
+                        } finally {
+                            setLoading(false)
+                        }
                     }}
                 />
             </Modal>

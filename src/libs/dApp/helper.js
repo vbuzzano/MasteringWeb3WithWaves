@@ -2,7 +2,9 @@
 /* eslint-disable max-len */
 import { sha256, base58encode } from '@waves/waves-crypto'
 
-import { DAPP_ADDRESS } from './dApp'
+import config from '../../../config'
+
+const DAPP_ADDRESS = config.dAppAddress
 
 const dataListToObj = (list) => {
     const rv = {}
@@ -21,6 +23,16 @@ export const getDataByKey = (key) => {
         val = window.dAppData[key].value
     }
     return val
+}
+
+export const shortAddress = addr => `${addr?.substr(0, 4)}...${addr?.substr(addr?.length - 5, 4)}`
+
+export const formatNumber = (amt, option = { locales: 'en-IN', decimals: 8 }) => {
+    const { locales, decimals } = option
+    const dc = 10 ** decimals
+    return new Intl.NumberFormat(locales, {
+        maximumSignificantDigits: decimals + 6,
+    }).format(amt / dc)
 }
 
 const getSupplierItemIds = address => async (data = []) => {
@@ -168,23 +180,50 @@ export const fetchUserPurchases = async address =>
     await preparePurchases(getUserPurchaseIds(address))
 
 export const fetchUserCoupons = async (address) => {
-    const list = await fetchUserPurchases(address)
-    return list.filter(e => e.status === 'accepted')
+    let list = await fetchUserPurchases(address)
+    list = list.filter(e => e.status === 'accepted')
+    list = await Promise.all(list.map(async (e) => {
+        const { assetId } = e
+        if (!assetId) return false
+        let url = null; let r = null; let body = null
+        // is Active
+        url = `https://nodes-testnet.wavesnodes.com/assets/balance/${address}/${assetId}`
+        r = await fetch(url)
+        body = r.ok && await r.json()
+        const isOwned = r.ok && body.balance > 0
+
+        // is Used
+        url = `https://api-testnet.wavesplatform.com/v0/transactions/transfer?sender=${e.user}&assetId=${assetId}&limit=1`
+        r = await fetch(url)
+        body = r.ok && await r.json()
+        const isUsed = r.ok && body.data.length > 0
+
+        e.isOwned = isOwned && !isUsed
+        e.isUsed = isUsed
+        if (e.isUsed) e.status = 'used'
+
+        return e
+    }))
+    return list
 }
 
 export const fetchUserActiveCoupons = async (address) => {
-    const list = await fetchUserPurchases(address)
-    return await asyncFilter(list, async (e) => {
+    const list = await fetchUserCoupons(address)
+    return list.filter(e => e.isOwned)
+/*    const activeList = await asyncFilter(list, async (e) => {
         const { assetId } = e
         if (!assetId) return false
         const url = `https://nodes-testnet.wavesnodes.com/assets/balance/${address}/${assetId}`
         const r = await fetch(url)
         const body = r.ok && await r.json()
-        if (r.ok) {
-            console.debug(body)
-        }
         return r.ok && body.balance > 0
     })
+*/
+}
+
+export const fetchUserUsedCoupons = async (address) => {
+    const list = await fetchUserCoupons(address)
+    return list.filter(e => e.isUsed)
 }
 
 export const fetchSupplierItems = async address =>
@@ -195,8 +234,31 @@ export const fetchSupplierPurchases = async (address) => {
     return list
 }
 export const fetchSupplierCoupons = async (address) => {
-    const list = await fetchSupplierPurchases(address)
-    return list.filter(e => e.status === 'accepted')
+    let list = await fetchSupplierPurchases(address)
+    list = list.filter(e => e.status === 'accepted')
+    list = await Promise.all(list.map(async (e) => {
+        const { assetId } = e
+        if (!assetId) return false
+        let url = null; let r = null; let body = null
+        // is Received
+        url = `https://api-testnet.wavesplatform.com/v0/transactions/transfer?recipient=${e.supplier}&assetId=${assetId}&limit=1`
+        r = await fetch(url)
+        body = r.ok && await r.json()
+        const isReceived = r.ok && body.data.length > 0
+
+        // is Owned
+        url = `https://nodes-testnet.wavesnodes.com/assets/balance/${address}/${assetId}`
+        r = await fetch(url)
+        body = r.ok && await r.json()
+        const isOwned = r.ok && body.balance > 0
+        e.isOwned = isOwned && isReceived
+        e.isBurned = isReceived && !isOwned
+        if (e.isOwned) e.status = 'used'
+        if (e.isBurned) e.status = 'burned'
+
+        return e
+    }))
+    return list
 }
 
 export const fetchSupplierActiveCoupons = async (address) => {
@@ -206,10 +268,21 @@ export const fetchSupplierActiveCoupons = async (address) => {
 
 export const fetchSupplierReceivedCoupons = async (address) => {
     const list = await fetchSupplierActiveCoupons(address)
-    return await asyncFilter(list, async (e) => {
-        const r = await fetch(`https://nodes-testnet.wavesnodes.com/assets/balance/${address}/${e.assetId}`)
-        return r.ok && (await r.json()).balance > 0
-    })
+    return list.filter(e => e.isOwned)
+}
+
+export const fetchSupplierAvailableCoupons = async (address) => {
+    let list = await fetchSupplierCoupons(address)
+    list = list.filter(e => !e.isFundPaid)
+    list.map(e => console.info(e.id, e.isExpired, e.isBurned, e.isOwned))
+    return list.filter(e => (
+        e.isExpired || e.isBurned || e.isOwned
+    ))
+}
+
+export const fetchSupplierAvailableFunds = async (address) => {
+    const list = await fetchSupplierAvailableCoupons(address)
+    return list.reduce((a, b) => a + b.amount, 0)
 }
 
 export const getItemByKey = async (key) => {
@@ -242,6 +315,11 @@ export const getSupplierAvailableBalance = async (address) => {
         }
     }
     return 0
+}
+
+export const getSupplierApprovalCounter = async (address) => {
+    const list = await fetchSupplierPurchases(address)
+    return list.filter(e => e.status === 'approval').length
 }
 
 export const hashVote = (item, vote, salt) => {

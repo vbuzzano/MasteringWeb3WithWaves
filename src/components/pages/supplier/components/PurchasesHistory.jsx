@@ -1,19 +1,23 @@
+/* eslint-disable no-alert */
 /* eslint-disable react/no-unescaped-entities */
 import React, { useEffect, useState } from 'react'
 
 import { Purchases } from '../../../../containers'
-import { DATA, fetchUserPurchases, subscribe } from '../../../../libs/dApp'
+import {
+    DATA, fetchSupplierPurchases, subscribe,
+} from '../../../../libs/dApp'
 
-const MyPurchases = ({ account, setActiveUrl }) => {
+function PurchasesHistory({ account, setActiveUrl }) {
     const [purchases, updatePurchases] = useState([])
-    const { address } = account
 
     useEffect(() => {
         async function refreshData() {
             try {
                 // purchases history
-                const list = await fetchUserPurchases(address)
-                const historyList = list.sort((a, b) => a.timestamp < b.timestamp)
+                const { address } = account
+                console.log(address)
+                const list = await fetchSupplierPurchases(address)
+                const historyList = list.filter(s => s.status !== 'approval').sort((a, b) => a.timestamp < b.timestamp)
                 console.debug('[ 🔄 Purchases History ] :', `${historyList.length} purchases loaded`)
                 updatePurchases(historyList)
             } catch (error) {
@@ -21,19 +25,17 @@ const MyPurchases = ({ account, setActiveUrl }) => {
             }
         }
         return subscribe(DATA, refreshData)
-    }, [address])
+    }, [])
 
     return (
         <>
-            <div>
-                <Purchases
-                    setActiveUrl={setActiveUrl}
-                    purchases={purchases}
-                />
-            </div>
+            <Purchases
+                isManage="history"
+                purchases={purchases}
+                setActiveUrl={setActiveUrl}
+            />
         </>
-
     )
 }
 
-export default MyPurchases
+export default PurchasesHistory

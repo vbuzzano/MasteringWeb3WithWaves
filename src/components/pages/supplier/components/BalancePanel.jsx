@@ -1,13 +1,33 @@
+/* eslint-disable max-len */
 /* eslint-disable react/jsx-one-expression-per-line */
 /* eslint-disable no-alert */
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import { Box, Flex } from '../../../shared'
+import {
+    DATA, fetchSupplierAvailableFunds, formatNumber, getSupplierBalance, subscribe,
+} from '../../../../libs/dApp'
 
-const BalancePanel = ({
-    amount, available, locked, onWithdraw,
-}) => {
-    amount ??= 0; available ??= 0; locked ??= 0; onWithdraw ??= () => {}
+const BalancePanel = ({ account }) => {
+    const [amount, setAmount] = useState(0)
+    const [available, setAvailable] = useState(0)
+    const [locked, setLocked] = useState(0)
+    const { address } = account
+
+    useEffect(() => {
+        async function refreshData() {
+            const amt = await getSupplierBalance(address)
+            const avl = await fetchSupplierAvailableFunds(address)
+            const lck = amt - avl
+
+            setAmount(amt)
+            setAvailable(avl)
+            setLocked(lck)
+            console.debug('[ 🔄 Supplier ] :', `Balance updated (${avl} / ${amt})`)
+        }
+        return subscribe(DATA, refreshData)
+    }, [address])
+
     return (
         <div className="manager-balance-panel">
             <Flex
@@ -19,39 +39,28 @@ const BalancePanel = ({
                 flexWrap="wrap"
                 style={{ marginTop: '15px', marginBottom: '15px' }}
             >
-
                 <Box
                     as="big"
-                    className={available > 0 ? 'badge badge-success' : 'badge badge-dark'}
+                    className={amount > 0 ? 'badge badge-primary' : 'badge badge-dark'}
                     style={{ margin: '10px', padding: '20px', width: '250px' }}
                 >
-                    <div>available balance</div><h5> { available } </h5><div>WAVES</div>
+                    <div>total locked funds</div><h5> { formatNumber(amount) } </h5><div>WAVES</div>
                 </Box>
                 <Box
                     as="big"
                     className="badge badge-dark"
                     style={{ margin: '10px', padding: '20px', width: '250px' }}
                 >
-                    <div>locked balance</div><h5> { locked } </h5><div>WAVES</div>
+                    <div>locked funds</div><h5> { formatNumber(locked) } </h5><div>WAVES</div>
                 </Box>
+
                 <Box
                     as="big"
-                    className={amount > 0 ? 'badge badge-primary' : 'badge badge-dark'}
+                    className={available > 0 ? 'badge badge-success' : 'badge badge-secondary'}
                     style={{ margin: '10px', padding: '20px', width: '250px' }}
                 >
-                    <div>total balance</div><h5> { amount } </h5><div>WAVES</div>
+                    <div>available funds</div><h5> { formatNumber(available) } </h5><div>WAVES</div>
                 </Box>
-                {available > 0 ? (
-                    <Box
-                        as="button"
-                        className="btn btn-success center"
-                        style={{ margin: '10px', padding: '20px', width: '250px' }}
-                        type="button"
-                        onClick={onWithdraw}
-                    >
-                                Withdraw Available
-                    </Box>
-                ) : '' }
             </Flex>
         </div>
     )

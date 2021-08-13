@@ -1,10 +1,11 @@
+/* eslint-disable no-alert */
 /* eslint-disable react/no-unescaped-entities */
 import React, { useEffect, useState } from 'react'
 
 import { Coupons } from '../../../../containers'
 import {
     addItem,
-    DATA, fetchData, fetchSupplierItems, removeItem, subscribe, updateItem,
+    DATA, fetchSupplierItems, removeItem, subscribe, updateItem,
 } from '../../../../libs/dApp'
 import { Dialog, Form, Result } from '../../../modal'
 import { useAppDialogs } from '../../../service'
@@ -20,33 +21,24 @@ function Manager({ account, activeUrl, setActiveUrl }) {
         result: [resultOpened, onResultOpen, onResultClose],
     } = useAppDialogs()
 
-    const refreshItems = async () => {
-        let list = []
-        try {
-            list = await fetchSupplierItems(account.address)
-            console.debug('[ 🔄 Manager ] :', `${list.length} items loaded`)
-            updateItems(list)
-        } catch (error) {
-            console.error(error)
-        }
-    }
+    const { address } = account
 
-    useEffect(() => subscribe(DATA, refreshItems), [account])
+    useEffect(() => {
+        async function refreshData() {
+            let list = []
+            try {
+                list = await fetchSupplierItems(address)
+                console.debug('[ 🔄 Manager ] :', `${list.length} items loaded`)
+                updateItems(list)
+            } catch (error) {
+                console.error(error)
+            }
+        }
+        return subscribe(DATA, refreshData)
+    }, [address])
 
     return (
         <>
-            <div className="alert alert-dark text-center">
-                <button
-                    type="submit"
-                    className="btn btn-primary"
-                    onClick={() => {
-                        onFormOpen()
-                    }}
-                >
-                    Add New Coupon
-                </button>
-
-            </div>
             <Flex
                 justifyContent="center"
                 px={{
@@ -66,7 +58,7 @@ function Manager({ account, activeUrl, setActiveUrl }) {
             </Flex>
             <Modal open={dialogOpened} onClose={onDialogClose}>
                 <Dialog
-                    buttons={[]}
+                    buttons={['edit', 'remove']}
                     activeUrl={activeUrl}
                     manageMode
                     coupon={selectedItem}
@@ -83,9 +75,9 @@ function Manager({ account, activeUrl, setActiveUrl }) {
                             }
                             onDialogClose()
                         } catch (error) {
+                            alert(error.message)
                             console.log(error)
                         } finally {
-                            await fetchData()
                             setLoading(false)
                         }
                     }}
@@ -119,7 +111,6 @@ function Manager({ account, activeUrl, setActiveUrl }) {
                         } catch (error) {
                             console.log(error)
                         } finally {
-                            await fetchData()
                             setLoading(false)
                         }
                     }}
@@ -128,7 +119,7 @@ function Manager({ account, activeUrl, setActiveUrl }) {
 
             <Modal open={resultOpened} onClose={onResultClose}>
                 <Result
-                    text="<div class='alert alert-success'>Your coupon as been saved successfully</div>"
+                    text="<div class='alert alert-success'>Your coupon has been updated successfully</div>"
                     onClose={onResultClose}
                 />
             </Modal>

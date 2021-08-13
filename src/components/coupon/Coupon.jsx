@@ -5,6 +5,7 @@ import memoizeOne from 'memoize-one'
 import { Rating, Price, Discount } from './coupon-controls'
 
 import { Box, Flex, Text } from '../shared'
+import { formatNumber } from '../../libs/dApp'
 
 const isEmpty = memoizeOne(val => val === undefined || val === 0)
 
@@ -79,7 +80,7 @@ const Coupon = ({
                     fontSize="14px"
                     flex={1}
                 >
-                    {`${Number.parseFloat(couponPrice / 1e8).toFixed(8)} ${couponTerm}`}
+                    {`${formatNumber(couponPrice)} ${couponTerm}`}
                 </Text>
                 {oldPrice !== newPrice && (
                     <Price term={priceTerm} isOld>

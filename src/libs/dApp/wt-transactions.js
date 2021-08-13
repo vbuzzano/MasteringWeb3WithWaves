@@ -1,12 +1,27 @@
-/* eslint-disable max-len */
-/* eslint-disable no-undef */
-// import { broadcast, issue, waitForTx } from '@waves/waves-transactions'
-import { waitForTx } from '@waves/waves-transactions'
+import { broadcast, waitForTx } from '@waves/waves-transactions'
 
-import { DAPP_ADDRESS } from './dApp'
+import { DAPP_ADDRESS, currentNetwork, fetchData } from './dApp'
 import { hashVote } from './helper'
 
-const couponNFTassetScript = 'BAQAAAAETk9ORQIAAAAEbm9uZQQAAAAKZEFwcFB1YktleQEAAAAgKv06o81Qvd/fCJYTxsI9vC4ZXiBqgITew1Mb0EZVm3kEAAAABGRBcHAJAQAAABRhZGRyZXNzRnJvbVB1YmxpY0tleQAAAAEFAAAACmRBcHBQdWJLZXkKAQAAAA5nZXRTdHJpbmdCeUtleQAAAAIAAAAHYWRkcmVzcwAAAANrZXkEAAAAByRtYXRjaDAJAAQdAAAAAgUAAAAHYWRkcmVzcwUAAAADa2V5AwkAAAEAAAACBQAAAAckbWF0Y2gwAgAAAAZTdHJpbmcEAAAAAWEFAAAAByRtYXRjaDAFAAAAAWEFAAAABE5PTkUKAQAAAA9nZXRJbnRlZ2VyQnlLZXkAAAACAAAAB2FkZHJlc3MAAAADa2V5BAAAAAckbWF0Y2gwCQAEGgAAAAIFAAAAB2FkZHJlc3MFAAAAA2tleQMJAAABAAAAAgUAAAAHJG1hdGNoMAIAAAADSW50BAAAAAFhBQAAAAckbWF0Y2gwBQAAAAFhAAAAAAAAAAAACgEAAAAMZ2V0S2V5Q291cG9uAAAAAQAAAAdhc3NldElkCQABLAAAAAICAAAAB2NvdXBvbl8FAAAAB2Fzc2V0SWQKAQAAABBnZXRLZXlDb3Vwb25JdGVtAAAAAQAAAAZjb3Vwb24JAAEsAAAAAgUAAAAGY291cG9uAgAAAAVfaXRlbQoBAAAAEmdldEtleUl0ZW1TdXBwbGllcgAAAAEAAAAEaXRlbQkAASwAAAACBQAAAARpdGVtAgAAAAZfb3duZXIKAQAAABRnZXRLZXlJdGVtRXhwaXJlRGF0ZQAAAAEAAAAEaXRlbQkAASwAAAACBQAAAARpdGVtAgAAAAtfZXhwaXJlZGF0ZQoBAAAAB2dldEl0ZW0AAAABAAAABmNvdXBvbgkBAAAADmdldFN0cmluZ0J5S2V5AAAAAgUAAAAEZEFwcAkBAAAAEGdldEtleUNvdXBvbkl0ZW0AAAABBQAAAAZjb3Vwb24KAQAAAA9nZXRJdGVtU3VwcGxpZXIAAAABAAAABGl0ZW0JAQAAAA5nZXRTdHJpbmdCeUtleQAAAAIFAAAABGRBcHAJAQAAABJnZXRLZXlJdGVtU3VwcGxpZXIAAAABBQAAAARpdGVtCgEAAAARZ2V0SXRlbUV4cGlyZURhdGUAAAABAAAABGl0ZW0JAQAAAA9nZXRJbnRlZ2VyQnlLZXkAAAACBQAAAARkQXBwCQEAAAASZ2V0S2V5SXRlbVN1cHBsaWVyAAAAAQUAAAAEaXRlbQQAAAAGY291cG9uCQEAAAAMZ2V0S2V5Q291cG9uAAAAAQkAAlgAAAABCAUAAAAEdGhpcwAAAAJpZAQAAAAEaXRlbQkBAAAAB2dldEl0ZW0AAAABBQAAAAZjb3Vwb24EAAAABmV4cGlyZQkBAAAAEWdldEl0ZW1FeHBpcmVEYXRlAAAAAQUAAAAEaXRlbQQAAAAIc3VwcGxpZXIJAQAAAA9nZXRJdGVtU3VwcGxpZXIAAAABBQAAAARpdGVtBAAAAAlpc0V4cGlyZWQJAABnAAAAAgUAAAAGZXhwaXJlCAUAAAACdHgAAAAJdGltZXN0YW1wCgEAAAAXY2hlY2tBbmRBY2NlcHRTZXRTY3JpcHQAAAABAAAAAWUJAAAAAAAAAggFAAAAAWUAAAAGc2VuZGVyBQAAAARkQXBwCgEAAAASY2hlY2tBbmRBY2NlcHRCdXJuAAAAAQAAAAFlAwMJAAAAAAAAAggFAAAAAWUAAAAGc2VuZGVyBQAAAARkQXBwBgkAAAAAAAACCAUAAAABZQAAAAZzZW5kZXIJAAQmAAAAAQUAAAAIc3VwcGxpZXIGCQAAAgAAAAECAAAAK09ubHkgY291cG9uJ3Mgc3VwcGxpZXIgY2FuIGJ1cm4gdGhpcyBjb3Vwb24KAQAAABZjaGVja0FuZEFjY2VwdFRyYW5zZmVyAAAAAQAAAAFlAwMJAAAAAAAAAggFAAAAAWUAAAAGc2VuZGVyBQAAAARkQXBwBgkAAAAAAAACCAUAAAABZQAAAAZzZW5kZXIJAAQmAAAAAQUAAAAIc3VwcGxpZXIGAwkAAAAAAAACCAUAAAABZQAAAAlyZWNpcGllbnQJAAQmAAAAAQUAAAAIc3VwcGxpZXIGCQAAAgAAAAEJAAEsAAAAAgIAAAAuWW91IGNhbiB0cmFuc2ZlciB0aGlzIGNvdXBvbiBvbmx5IHRvIHN1cHBsaWVyIAUAAAAIc3VwcGxpZXIKAQAAABpjaGVja0FuZEFjY2VwdEludm9rZVNjcmlwdAAAAAEAAAABZQMDCQAAAAAAAAIIBQAAAAFlAAAABnNlbmRlcgUAAAAEZEFwcAYJAAAAAAAAAggFAAAAAWUAAAAGc2VuZGVyCQAEJgAAAAEFAAAACHN1cHBsaWVyBgMJAAAAAAAAAggFAAAAAWUAAAAGc2VuZGVyCQAEJgAAAAEFAAAACHN1cHBsaWVyBgkAAAIAAAABAgAAADdZb3UgY2FuIG9ubHkgaW52b2tlIHNjcmlwdCBvZiBDb3Vwb24gQmF6YWFyIE1hcmtldCBkQXBwAwkAAAAAAAACBQAAAARpdGVtBQAAAAROT05FCQAAAgAAAAEJAAEsAAAAAgIAAAAaSXRlbSBub3QgZm91bmQgZm9yIGNvdXBvbiAFAAAABmNvdXBvbgMJAAAAAAAAAgUAAAAIc3VwcGxpZXIFAAAABE5PTkUJAAACAAAAAQkAASwAAAACCQABLAAAAAICAAAAElN1cHBsaWVyIGZvciBpdGVtIAUAAAAEaXRlbQIAAAAKIG5vdCBmb3VuZAMFAAAACWlzRXhwaXJlZAQAAAAHJG1hdGNoMAUAAAACdHgDCQAAAQAAAAIFAAAAByRtYXRjaDACAAAAGVNldEFzc2V0U2NyaXB0VHJhbnNhY3Rpb24EAAAAAWUFAAAAByRtYXRjaDAJAQAAABdjaGVja0FuZEFjY2VwdFNldFNjcmlwdAAAAAEFAAAAAWUDCQAAAQAAAAIFAAAAByRtYXRjaDACAAAAD0J1cm5UcmFuc2FjdGlvbgQAAAABZQUAAAAHJG1hdGNoMAYJAAACAAAAAQIAAABMVGhpcyBjb3Vwb24gaGFzIGV4cGlyZWQgYW5kIGNhbiBvbmx5IGJlIGJ1cm5lZCB0byByZW1vdmUgaXQgZnJvbSB5b3VyIHdhbGxldAQAAAAHJG1hdGNoMAUAAAACdHgDCQAAAQAAAAIFAAAAByRtYXRjaDACAAAAGVNldEFzc2V0U2NyaXB0VHJhbnNhY3Rpb24EAAAAAWUFAAAAByRtYXRjaDAJAQAAABdjaGVja0FuZEFjY2VwdFNldFNjcmlwdAAAAAEFAAAAAWUDCQAAAQAAAAIFAAAAByRtYXRjaDACAAAAD0J1cm5UcmFuc2FjdGlvbgQAAAABZQUAAAAHJG1hdGNoMAkBAAAAEmNoZWNrQW5kQWNjZXB0QnVybgAAAAEFAAAAAWUDCQAAAQAAAAIFAAAAByRtYXRjaDACAAAAE1RyYW5zZmVyVHJhbnNhY3Rpb24EAAAAAWUFAAAAByRtYXRjaDAJAQAAABZjaGVja0FuZEFjY2VwdFRyYW5zZmVyAAAAAQUAAAABZQMJAAABAAAAAgUAAAAHJG1hdGNoMAIAAAAXSW52b2tlU2NyaXB0VHJhbnNhY3Rpb24EAAAAAWUFAAAAByRtYXRjaDAJAQAAABpjaGVja0FuZEFjY2VwdEludm9rZVNjcmlwdAAAAAEFAAAAAWUDCQAAAAAAAAIIBQAAAAJ0eAAAAAZzZW5kZXIJAAQmAAAAAQUAAAAIc3VwcGxpZXIJAAACAAAAAQIAAABXVGhpcyBjb3Vwb24gY2FuIG9ubHkgYmUgdXNlIHRvIHN1cHBsaWVyIGluIGFuIGV4Y2hhbmdlIG9mIGdvb2Qgb3Igc2VydmljZSB3aXRoIGRpc2NvdW50CQAAAgAAAAECAAAAMlRoaXMgY291cG9uIGNhbiBiZSBidXJuZWQgdG8gZW5hYmxlIHdpdGhkcmF3IGZ1bmRzmvd1eg=='
+import config from '../../../config'
+
+const { nftScript } = config
+
+const timeout = 300000 // 5 minutes
+
+// eslint-disable-next-line no-undef
+const signTx = async txData => JSON.parse(await WavesKeeper.signTransaction(txData))
+
+const publishTx = async (signedTx) => {
+    const { server } = currentNetwork()
+    const tx = await broadcast(signedTx, server)
+    return waitForTx(tx.id, { apiBase: server, timeout })
+}
+
+const signAndPublishTx = async (txData) => {
+    const signedTx = await signTx(txData)
+    return await publishTx(signedTx)
+}
 
 /*
 const createCoupon = async (coupon) => {
@@ -14,7 +29,7 @@ const createCoupon = async (coupon) => {
     const stx = issue({
         name: title,
         description: shortDescription,
-        script: couponNFTassetScript,
+        script: nftScript,
         quantity: 1,
         decimals: 0,
         reissuable: false,
@@ -86,7 +101,9 @@ export const addItem = async (data) => {
             },
         },
     }
-    return await WavesKeeper.signAndPublishTransaction(txData)
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
 }
 
 export const updateItem = async (data) => {
@@ -128,7 +145,9 @@ export const updateItem = async (data) => {
             },
         },
     }
-    return await WavesKeeper.signAndPublishTransaction(txData)
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
 }
 
 export const removeItem = async (id) => {
@@ -152,7 +171,9 @@ export const removeItem = async (id) => {
             },
         },
     }
-    return await WavesKeeper.signAndPublishTransaction(txData)
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
 }
 
 export const registerSupplier = async (data) => {
@@ -176,7 +197,9 @@ export const registerSupplier = async (data) => {
             },
         },
     }
-    return await WavesKeeper.signAndPublishTransaction(txData)
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
 }
 
 export const purchaseCoupon = async (coupon) => {
@@ -207,7 +230,9 @@ export const purchaseCoupon = async (coupon) => {
             },
         },
     }
-    return await WavesKeeper.signAndPublishTransaction(txData)
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
 }
 
 export const rejectPurchase = async (purchase) => {
@@ -231,11 +256,13 @@ export const rejectPurchase = async (purchase) => {
             },
         },
     }
-    return await WavesKeeper.signAndPublishTransaction(txData)
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
 }
 
 export const sendCouponToSupplier = async (purchase) => {
-    const txTransferData = {
+    const txData = {
         type: 4,
         data: {
             amount: {
@@ -249,8 +276,9 @@ export const sendCouponToSupplier = async (purchase) => {
             recipient: purchase.supplier,
         },
     }
-    const res3 = JSON.parse(await WavesKeeper.signAndPublishTransaction(txTransferData))
-    await waitForTx(res3.id, { apiBase: window.dApp.baseUri })
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
 }
 
 export const acceptPurchase = async (purchase, setStepDone) => {
@@ -265,17 +293,15 @@ export const acceptPurchase = async (purchase, setStepDone) => {
             quantity: 1,
             precision: 0,
             reissuable: false,
-            script: `base64:${couponNFTassetScript}`,
+            script: `base64:${nftScript}`,
             fee: {
                 tokens: '0.001',
                 assetId: 'WAVES',
             },
         },
     }
-    const res1 = JSON.parse(await WavesKeeper.signAndPublishTransaction(txGenAssetData))
-    const assetId = res1.id
-    await waitForTx(res1.id, { apiBase: window.dApp.baseUri })
-    if (setStepDone) setStepDone(1)
+    const stx1 = await signTx(txGenAssetData)
+    const assetId = stx1.id
 
     // accept purchase and transfer coupon
     const txAcceptData = {
@@ -302,9 +328,8 @@ export const acceptPurchase = async (purchase, setStepDone) => {
             },
         },
     }
-    const res2 = JSON.parse(await WavesKeeper.signAndPublishTransaction(txAcceptData))
-    await waitForTx(res2.id, { apiBase: window.dApp.baseUri })
-    if (setStepDone) setStepDone(2)
+
+    const stx2 = await signTx(txAcceptData)
 
     // accept purchase and transfer coupon
     const txTransferData = {
@@ -321,11 +346,15 @@ export const acceptPurchase = async (purchase, setStepDone) => {
             recipient: purchase.user,
         },
     }
-    const res3 = JSON.parse(await WavesKeeper.signAndPublishTransaction(txTransferData))
-    await waitForTx(res3.id, { apiBase: window.dApp.baseUri })
-    if (setStepDone) setStepDone(3)
 
-    return [res1, res2, res3]
+    if (setStepDone) setStepDone(1)
+    const res = await Promise.all([publishTx(stx1), publishTx(stx2)])
+
+    if (setStepDone) setStepDone(2)
+    const stx3 = await signTx(txTransferData)
+    const res3 = await publishTx(stx3)
+    await fetchData()
+    return [...res, res3]
 }
 
 export const burnCoupon = async (assetId) => {
@@ -346,9 +375,12 @@ export const burnCoupon = async (assetId) => {
             },
         },
     }
-    return await WavesKeeper.signAndPublishTransaction(txData)
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
 }
 
+/*
 export const withdrawAvailable = async () => {
     const txData = {
         type: 16,
@@ -365,7 +397,33 @@ export const withdrawAvailable = async () => {
             },
         },
     }
-    return await WavesKeeper.signAndPublishTransaction(txData)
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
+}
+*/
+
+export const withdrawFunds = async (assetId) => {
+    const txData = {
+        type: 16,
+        data: {
+            dApp: DAPP_ADDRESS,
+            call: {
+                function: 'withdraw',
+                args: [
+                    { type: 'string', value: assetId },
+                ],
+            },
+            payment: [],
+            fee: {
+                tokens: '0.005',
+                assetId: 'WAVES',
+            },
+        },
+    }
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
 }
 
 export const commitVote = async (item, vote, salt) => {
@@ -388,5 +446,7 @@ export const commitVote = async (item, vote, salt) => {
             },
         },
     }
-    return await WavesKeeper.signAndPublishTransaction(txData)
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
 }

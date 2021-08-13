@@ -8,10 +8,13 @@ const Menu = ({
         <>
             <Box type="ul" className="nav nav-tabs">
                 <Box type="li" className="nav-item" onClick={() => setActiveUrl('#my/coupons')}>
-                    <a className={activeUrl === ('#my/coupons') ? 'nav-link active' : 'nav-link'} href="#my/coupons">My Coupons</a>
+                    <a className={activeUrl?.match(new RegExp('.*/?(#my[^/]*|#my/coupons.*)$')) ? 'nav-link active' : 'nav-link'} href="#my/coupons">Active Coupons</a>
+                </Box>
+                <Box type="li" className="nav-item" onClick={() => setActiveUrl('#my/used')}>
+                    <a className={activeUrl?.match(new RegExp('.*/?(#my/used.*)$')) ? 'nav-link active' : 'nav-link'} href="#my/used">Used Coupons</a>
                 </Box>
                 <Box type="li" className="nav-item" onClick={() => setActiveUrl('#my/purchases')}>
-                    <a className={activeUrl?.indexOf('#my/purchases') >= 0 ? 'nav-link active' : 'nav-link'} href="#my/purchases">My Purchases</a>
+                    <a className={activeUrl?.match(new RegExp('.*/?(#my/purchases.*)$')) ? 'nav-link active' : 'nav-link'} href="#my/purchases">Purchases history</a>
                 </Box>
             </Box>
         </>

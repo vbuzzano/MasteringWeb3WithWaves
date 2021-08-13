@@ -4,7 +4,7 @@
 
 let NONE = "none"
 
-let dAppPubKey = base58'3tp5fNYyPi4jMnkf6s1k4kBqvJ7nm57SxzvLyi8RkxT2'
+let dAppPubKey = base58'FHpHpSeEJhz3pVGgYuLDVj7fesP8NNRAMtG9Kh8EQevE'
 let dApp = addressFromPublicKey(dAppPubKey)
 
 func getStringByKey(address: Address, key: String) = { 

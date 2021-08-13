@@ -5,6 +5,11 @@ export const headerLinks = [
         isEnabled: () => true,
     },
     {
+        url: '#my',
+        title: 'My Coupons',
+        isEnabled: () => true,
+    },
+    {
         url: '#supplier',
         title: 'Supplier',
         isEnabled: () => true,
@@ -42,7 +47,7 @@ export const companyLinks = [
 
 export const workLinks = [
     {
-        url: '#register',
+        url: '#supplier',
         title: 'Register as Supplier',
         isEnabled: e => e.isSupplier,
     },

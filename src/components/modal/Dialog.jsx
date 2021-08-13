@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React from 'react'
 
 import * as Controls from './controls'
@@ -10,6 +11,7 @@ const Dialog = ({
     buttons, coupon, onClose, onEdit, onBuy, onRemove, onUse, onBurn, onVote,
 }) => {
     buttons ??= ['cancel', 'buy']
+console.info(buttons)
     return (
         <>
         <Box width="600px">
@@ -60,7 +62,7 @@ const Dialog = ({
                     </Controls.Button>
                 ) : '' }
 
-                { buttons.includes('use') && (coupon.canUse || coupon.item?.canUse)
+                { buttons.includes('use')
                     ? (
                         <Controls.Button color="blue.0" onClick={onUse}>
                         Use coupon

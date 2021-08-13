@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 /* eslint-disable react/no-unescaped-entities */
 import React, { useEffect, useState } from 'react'
 
@@ -6,12 +7,10 @@ import { Coupons } from '../../../containers'
 import { Dialog, FormVote, Result } from '../../modal'
 import { useAppDialogs } from '../../service'
 import {
-    subscribe, DATA, commitVote, fetchData, fetchItems, purchaseCoupon,
+    subscribe, DATA, commitVote, fetchItems, purchaseCoupon,
 } from '../../../libs/dApp'
 
-const PageMarket = ({
-    account, setActiveUrl,
-}) => {
+const PageMarket = ({ setActiveUrl }) => {
     const [loading, setLoading] = useState(false)
     const [items, updateItems] = useState([])
     const {
@@ -25,23 +24,27 @@ const PageMarket = ({
         result: [voteResultOpened, onVoteResultOpen, onVoteResultClose],
     } = useAppDialogs()
 
-    const refreshItems = async () => {
-        try {
-            const list = await fetchItems()
-            console.debug('[ 🔄 Market ] :', `${list.length} items loaded`)
-            updateItems(list)
-        } catch (error) {
-            console.error(error)
-        } finally {
-            setLoading(false)
+    useEffect(() => {
+        async function refreshData() {
+            try {
+                const list = await fetchItems()
+                console.debug('[ 🔄 Market ] :', `${list.length} items loaded`)
+                updateItems(list)
+            } catch (error) {
+                console.error(error)
+            } finally {
+                setLoading(false)
+            }
         }
-    }
-
-    useEffect(() => subscribe(DATA, refreshItems), [account])
+        return subscribe(DATA, refreshData)
+    }, [])
 
     return (
         <>
-            <div className="alert alert-light text-center">
+            <div className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 Find coupons in the bazaar market, and start saving money.
                 <br />
                 Thanks to the many discount coupons from our suppliers.
@@ -75,13 +78,23 @@ const PageMarket = ({
                     coupon={selectedItem}
                     onClose={onDialogClose}
                     onBuy={async () => {
-                        await purchaseCoupon(selectedItem)
-                        onDialogClose()
-                        onResultOpen()
+                        try {
+                            onDialogClose()
+                            await purchaseCoupon(selectedItem)
+                            onResultOpen()
+                        } catch (error) {
+                            alert(error.message)
+                            console.log(error)
+                        }
                     }}
                     onVote={async () => {
-                        onDialogClose()
-                        onVoteFormOpened()
+                        try {
+                            onDialogClose()
+                            onVoteFormOpened()
+                        } catch (error) {
+                            alert(error.message)
+                            console.log(error)
+                        }
                     }}
                 />
 
@@ -108,13 +121,12 @@ const PageMarket = ({
                     onSubmit={async (data) => {
                         setLoading(true)
                         try {
-                            await commitVote(selectedItem.id, 'featured', data.salt)
                             onVoteFormClose()
+                            await commitVote(selectedItem.id, 'featured', data.salt)
                             onVoteResultOpen()
                         } catch (error) {
                             console.log(error)
                         } finally {
-                            await fetchData()
                             setLoading(false)
                         }
                     }}

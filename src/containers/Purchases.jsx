@@ -1,22 +1,15 @@
 /* eslint-disable no-nested-ternary */
 import React from 'react'
-import styled from 'styled-components'
 
 import { Box } from '../components/shared'
+import { formatNumber, shortAddress } from '../libs/dApp'
 
-const Card = styled(Box)`
-    cursor: pointer;
-    transition: box-shadow linear 200ms;
-    &:hover {
-        box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.5);
-    }
-`
+const formatDate = date => date.toLocaleDateString('en-US')
 
 const Purchases = ({
-    loading, isManage, onReject, onAccept, purchases, setActiveUrl,
+    purchases, setActiveUrl, isManage, loading, onReject, onAccept, onBurn, onWithdraw,
 }) => {
     const list = purchases || []
-    console.debug(purchases)
 
     if (loading) {
         return (
@@ -33,8 +26,8 @@ const Purchases = ({
             return (
                 <div className="alert alert-dark text-center">
                 No purchases yet, go to &nbsp;
-                    <Box as="span" onClick={() => setActiveUrl('#supplier/coupons')}>
-                        <a className="btn btn-primary" href="#supplier/coupons">Manage Coupons</a>
+                    <Box as="span" onClick={() => setActiveUrl('#supplier/manage')}>
+                        <a className="btn btn-primary" href="#supplier/manage">Manage Coupons</a>
                     </Box>
                 &nbsp; to add, update or remove coupons
                 </div>
@@ -48,77 +41,97 @@ const Purchases = ({
             </div>
         )
     }
-    return list.map(purchase => (
-        <Box key={purchase.id} p="20px" width={{ 0: '100%', md: 'initial' }}>
-            <Box as={Card} className={purchase.status === 'approval' ? 'alert alert-primary' : purchase.status === 'rejected' ? 'alert alert-dark' : 'alert alert-success'}>
-                <div>
-                    <div className="float-right">
-                        <div style={{
-                            maxWidth: '200px', width: '200px', maxHeight: '60px', overflow: 'hidden',
-                        }}
-                        >
-                            <img src={purchase.item.image} style={{ maxWidth: '200px', width: '200px' }} alt="" />
-                        </div>
-                        <ul>
-                            <li>{`isBurned: ${purchase.isBurned}`}</li>
-                            <li>{`isExpired: ${purchase.isExpired}`}</li>
-                            <li>{`isFundPaid: ${(purchase.isFundPaid)}`}</li>
-                        </ul>
-                    </div>
-                    {' '}
-                    {purchase.status === 'approval' && !isManage ? 'Waiting Supplier Approval' : ''}
-                    {purchase.status === 'rejected' && !isManage ? 'You purchase has been rejected and refunded by supplier' : ''}
-                    {purchase.status === 'accepted' && !isManage ? 'You purchase has been accepted by supplier, and the coupon has been sent to you' : ''}
-                    {isManage ? purchase.status : ''}
-                    <br />
-                    <br />
-                    <ul>
-                        <li>
-                            Item:&nbsp;
-                            {purchase.item.name}
-                        </li>
-                        { isManage ? (
-                            <li>
-                                Customer:&nbsp;
-                                {purchase.user}
-                            </li>
-                        ) : (
-                            <li>
-                                Supplier:&nbsp;
-                                {purchase.supplier}
-                            </li>
-                        )
-                        }
-                        <li>
-                            Amount:&nbsp;
-                            {purchase.amount}
-                            &nbsp;WAVES
-                        </li>
-                        <li>
-                            Timestamp:&nbsp;
-                            {purchase.timestamp}
-                        </li>
-                    </ul>
-                    <br />
-                    <br />
-                    {purchase.status === 'approval' && isManage
-                        ? (
-                            <>
-                                <button type="button" className="btn btn-primary" onClick={() => onAccept(purchase)}>
-                                    Accept
-                                </button>
-                                &nbsp;
-                                <button type="button" className="btn btn-warning" onClick={() => onReject(purchase)}>
-                                    Reject
-                                </button>
-                            </>
-                        )
-                        : ''
-                    }
-                </div>
-            </Box>
-        </Box>
-    ))
+    return (
+        <table className="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Coupon</th>
+                    <th>{isManage ? 'Buyer address' : 'Supplier address'}</th>
+                    <th>
+                        {isManage ? isManage === 'withdraw' ? 'Unlocked Funds' : 'Locked Funds' : 'Paid'}
+                    </th>
+                    <th>Expire</th>
+                    <th>
+                        {isManage && isManage !== 'history' ? 'Action' : 'Status'}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {purchases.map((e) => {
+                    const refAddr = isManage ? e.user : e.supplier
+                    const classColor = e.status === 'approval' ? 'dark'
+                        : e.status === 'rejected' ? 'danger'
+                            : e.status === 'accepted' ? 'success'
+                                : e.status === 'used' ? 'secondary'
+                                    : 'primary'
+                    return (
+                        <tr key={e.id}>
+                            <td className="align-middle">
+                                {`${formatDate(new Date(e.timestamp))}`}
+                            </td>
+                            <td className="align-middle">
+                                <div className={`badge badge-${classColor} p-2`}>
+                                    <div style={{ display: 'block', maxHeight: '20px', overflow: 'hidden' }}>
+                                        <img src={e.item.image} width="150px" alt={e.item?.name} />
+                                    </div>
+                                    <b>{` ${e.item?.name}`}</b>
+                                </div>
+                            </td>
+                            <td className="align-middle">
+                                <a href={`https://testnet.wavesexplorer.com/address/${refAddr}/`} title={refAddr} target="_blank" rel="noreferrer">
+                                    {shortAddress(refAddr)}
+                                </a>
+                            </td>
+                            <td className="align-middle">
+                                {`${formatNumber(e.amount)} WAVES`}
+                            </td>
+                            <td className="align-middle">
+                                {e.item?.expirationDate}
+                                {' '}
+                                {e.isExpired ? ' true ' : ' false '}
+                                {' '}
+                                {e.isReceived ? ' true ' : ' false '}
+                                {' '}
+                                {e.isOwned ? ' true ' : ' false '}
+                                {e.isFundPaid ? ' true ' : ' false '}
+                            </td>
+                            <td className="align-middle">
+                                { isManage === 'approval' ? (
+                                    <div className="btn-group mr-2" role="group" aria-label="Logout">
+                                        <button type="button" title="Accept this coupon and send NFT to buyer" className="btn btn-success" onClick={() => onAccept(e)}>
+                                        Confirm
+                                        </button>
+                                        <button type="button" title="Reject this coupon and refund buyer" className="btn btn-danger" onClick={() => onReject(e)}>
+                                        Reject
+                                        </button>
+                                    </div>
+                                ) : null}
+
+                                { isManage === 'withdraw' ? (
+                                    <button type="button" title="Withdraw Funds" className="btn btn-success" onClick={() => onWithdraw(e)}>
+                                        Withdraw Funds
+                                    </button>
+                                ) : null}
+
+                                { isManage === 'history' ? (
+                                    <span className={`badge badge-${classColor}`}>
+                                        {e.status}
+                                    </span>
+                                ) : null}
+
+                                { isManage === 'burn' ? (
+                                    <button type="button" className="btn btn-primary" onClick={() => onBurn(e)}>
+                                        Burn Coupon
+                                    </button>
+                                ) : null}
+                            </td>
+                        </tr>
+                    )
+                })}
+            </tbody>
+        </table>
+    )
 }
 
 export default Purchases

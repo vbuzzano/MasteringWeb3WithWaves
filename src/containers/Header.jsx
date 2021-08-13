@@ -1,5 +1,5 @@
 import React, {
-    useEffect, useState, memo, useCallback,
+    useEffect, memo, useCallback,
 } from 'react'
 import MediaQuery from 'react-responsive'
 import { useSelector } from 'react-redux'
@@ -39,8 +39,7 @@ const initActiveUrl = (setActiveUrl) => {
 }
 
 const Header = ({
-    setActiveUrl, activeUrl, supplierApprovalCounter,
-    onAccountChange, account, onSupplierRegister,
+    account, activeUrl, setActiveUrl, onSupplierRegister, supplierApprovalCounter,
     // onCreateCoupon, filterActive, onChangeFilterState,
 }) => {
     useEffect(() => {
@@ -49,7 +48,6 @@ const Header = ({
 
     const { isOpen } = useSelector(mapStateToProps)
     const { changeMobileMenuState } = useDispatchedActions(rootActions)
-
     const onCloseMenu = useCallback(() => changeMobileMenuState(false))
 
     return (
