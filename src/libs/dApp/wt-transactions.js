@@ -101,7 +101,8 @@ export const addItem = async (data) => {
             },
         },
     }
-    const tx = await signAndPublishTx(txData)
+    const signedTx = await signTx(txData)
+    const tx = await publishTx(signedTx)
     await fetchData()
     return tx
 }
@@ -118,7 +119,7 @@ export const updateItem = async (data) => {
                 args: [
                     {
                         type: 'string',
-                        value: `item_${data.id}`,
+                        value: `${data.id}`,
                     },
                     {
                         type: 'string',
@@ -150,7 +151,8 @@ export const updateItem = async (data) => {
     return tx
 }
 
-export const removeItem = async (id) => {
+export const removeItem = async (coupon) => {
+    const { id } = coupon
     const txData = {
         type: 16,
         data: {
@@ -160,7 +162,7 @@ export const removeItem = async (id) => {
                 args: [
                     {
                         type: 'string',
-                        value: `item_${id}`,
+                        value: `${id}`,
                     },
                 ],
             },
@@ -203,6 +205,8 @@ export const registerSupplier = async (data) => {
 }
 
 export const purchaseCoupon = async (coupon) => {
+    const { id, couponPrice } = coupon
+
     const txData = {
         type: 16,
         data: {
@@ -212,14 +216,14 @@ export const purchaseCoupon = async (coupon) => {
                 args: [
                     {
                         type: 'string',
-                        value: `item_${coupon.id}`,
+                        value: `${id}`,
                     },
                 ],
             },
             payment: [
                 {
                     tokens: String(
-                        Number.parseFloat(coupon.couponPrice / 1e8).toFixed(8),
+                        Number.parseFloat(couponPrice / 1e8).toFixed(8),
                     ),
                     assetId: 'WAVES',
                 },
@@ -236,6 +240,7 @@ export const purchaseCoupon = async (coupon) => {
 }
 
 export const rejectPurchase = async (purchase) => {
+    const { id } = purchase
     const txData = {
         type: 16,
         data: {
@@ -245,7 +250,7 @@ export const rejectPurchase = async (purchase) => {
                 args: [
                     {
                         type: 'string',
-                        value: `purchase_${purchase.id}`,
+                        value: `${id}`,
                     },
                 ],
             },
@@ -262,34 +267,36 @@ export const rejectPurchase = async (purchase) => {
 }
 
 export const sendCouponToSupplier = async (purchase) => {
+    const { assetId, supplier } = purchase
     const txData = {
         type: 4,
         data: {
             amount: {
                 tokens: '1',
-                assetId: `${purchase.assetId}`,
+                assetId,
             },
             fee: {
                 tokens: '0.005',
                 assetId: 'WAVES',
             },
-            recipient: purchase.supplier,
+            recipient: supplier,
         },
     }
     const tx = await signAndPublishTx(txData)
     await fetchData()
     return tx
 }
-
 export const acceptPurchase = async (purchase, setStepDone) => {
+    console.debug(purchase)
+    const { id, user, item } = purchase
+    const { title, shortDescription } = item
+
     // create coupon (NFT)
-    const coupon = purchase.item // await getItemByKey(purchase.item)
-    // const assetId = await createCoupon(coupon)
     const txGenAssetData = {
         type: 3,
         data: {
-            name: coupon.title,
-            description: coupon.shortDescription,
+            name: title,
+            description: shortDescription,
             quantity: 1,
             precision: 0,
             reissuable: false,
@@ -313,7 +320,7 @@ export const acceptPurchase = async (purchase, setStepDone) => {
                 args: [
                     {
                         type: 'string',
-                        value: `purchase_${purchase.id}`,
+                        value: `${id}`,
                     },
                     {
                         type: 'string',
@@ -343,7 +350,7 @@ export const acceptPurchase = async (purchase, setStepDone) => {
                 tokens: '0.005',
                 assetId: 'WAVES',
             },
-            recipient: purchase.user,
+            recipient: user,
         },
     }
 
@@ -357,7 +364,8 @@ export const acceptPurchase = async (purchase, setStepDone) => {
     return [...res, res3]
 }
 
-export const burnCoupon = async (assetId) => {
+export const burnCoupon = async (purchase) => {
+    const { assetId } = purchase
     const txData = {
         type: 16,
         data: {
@@ -380,30 +388,8 @@ export const burnCoupon = async (assetId) => {
     return tx
 }
 
-/*
-export const withdrawAvailable = async () => {
-    const txData = {
-        type: 16,
-        data: {
-            dApp: DAPP_ADDRESS,
-            call: {
-                function: 'withdrawAvailable',
-                args: [],
-            },
-            payment: [],
-            fee: {
-                tokens: '0.005',
-                assetId: 'WAVES',
-            },
-        },
-    }
-    const tx = await signAndPublishTx(txData)
-    await fetchData()
-    return tx
-}
-*/
-
-export const withdrawFunds = async (assetId) => {
+export const withdrawFunds = async (purchase) => {
+    const { assetId } = purchase
     const txData = {
         type: 16,
         data: {
@@ -426,8 +412,10 @@ export const withdrawFunds = async (assetId) => {
     return tx
 }
 
-export const commitVote = async (item, vote, salt) => {
-    const hash = hashVote(item.id || item, vote, salt)
+export const commitVote = async (data) => {
+    const { item, vote, salt } = data
+
+    const hash = hashVote(item, vote.toLowerCase(), salt)
     const txData = {
         type: 16,
         data: {
@@ -437,6 +425,38 @@ export const commitVote = async (item, vote, salt) => {
                 args: [
                     { type: 'string', value: item },
                     { type: 'string', value: hash },
+                ],
+            },
+            payment: [],
+            fee: {
+                tokens: '0.005',
+                assetId: 'WAVES',
+            },
+        },
+    }
+    const tx = await signAndPublishTx(txData)
+    await fetchData()
+    return tx
+}
+
+
+export const revealVote = async (data) => {
+    const { item, salt, commit } = data
+
+    const hash = hashVote(item, 'delisted', salt)
+    // alert(hash + ' === ' + commit)
+    const vote = hash === commit ? 'delisted' : 'featured'
+
+    const txData = {
+        type: 16,
+        data: {
+            dApp: DAPP_ADDRESS,
+            call: {
+                function: 'voteReveal',
+                args: [
+                    { type: 'string', value: item },
+                    { type: 'string', value: vote },
+                    { type: 'string', value: salt },
                 ],
             },
             payment: [],

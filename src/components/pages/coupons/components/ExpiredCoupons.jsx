@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react'
 
 import { CouponsList } from '../../../../containers'
 import {
-    DATA, fetchUserUsedCoupons, subscribe,
+    DATA, fetchUserExpiredCoupons, subscribe,
 } from '../../../../libs/dApp'
 import { Loading } from '../../../shared'
 
-const UsedCoupons = ({ account, setActiveUrl }) => {
+const ExpiredCoupons = ({ account, setActiveUrl }) => {
     const [loadingData, setLoadingData] = useState(true)
     const [items, updateItems] = useState(false)
     const { address } = account
@@ -15,8 +15,8 @@ const UsedCoupons = ({ account, setActiveUrl }) => {
         async function refreshData() {
             setLoadingData(true)
             try {
-                const list = await fetchUserUsedCoupons(address)
-                console.debug('[ 🔄 Used Coupons ] :', `${list.length} coupons loaded`)
+                const list = await fetchUserExpiredCoupons(address)
+                console.debug('[ 🔄 Expired Coupons ] :', `${list.length} coupons loaded`)
                 updateItems(list)
             } catch (error) {
                 console.error(error)
@@ -34,14 +34,13 @@ const UsedCoupons = ({ account, setActiveUrl }) => {
             <CouponsList
                 setActiveUrl={setActiveUrl}
                 items={items}
-                mode="used"
+                mode="history"
                 hideEmptyListMessage={loadingData}
-                enableVoting
             />
         </>
 
     )
 }
 
-export default UsedCoupons
+export default ExpiredCoupons
 

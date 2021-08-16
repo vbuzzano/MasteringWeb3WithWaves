@@ -3,6 +3,7 @@
 /* eslint-disable no-alert */
 import React, { useState, useEffect } from 'react'
 
+import { LockIcon, UnlockIcon } from '../../../layout/header-controls'
 import { Box, Flex } from '../../../shared'
 import {
     DATA, fetchSupplierAvailableFunds, formatNumber, getSupplierBalance, subscribe,
@@ -44,14 +45,14 @@ const BalancePanel = ({ account }) => {
                     className={amount > 0 ? 'badge badge-primary' : 'badge badge-dark'}
                     style={{ margin: '10px', padding: '20px', width: '250px' }}
                 >
-                    <div>total locked funds</div><h5> { formatNumber(amount) } </h5><div>WAVES</div>
+                    <div>total funds</div><h5 className="m-1"> { formatNumber(amount) } </h5><div>WAVES</div>
                 </Box>
                 <Box
                     as="big"
                     className="badge badge-dark"
                     style={{ margin: '10px', padding: '20px', width: '250px' }}
                 >
-                    <div>locked funds</div><h5> { formatNumber(locked) } </h5><div>WAVES</div>
+                    <div>locked funds</div><h5 className="m-1"> <LockIcon />{ formatNumber(locked) } </h5><div>WAVES</div>
                 </Box>
 
                 <Box
@@ -59,7 +60,7 @@ const BalancePanel = ({ account }) => {
                     className={available > 0 ? 'badge badge-success' : 'badge badge-secondary'}
                     style={{ margin: '10px', padding: '20px', width: '250px' }}
                 >
-                    <div>available funds</div><h5> { formatNumber(available) } </h5><div>WAVES</div>
+                    <div>available funds</div><h5 className="m-1"> <UnlockIcon />{ formatNumber(available) } </h5><div>WAVES</div>
                 </Box>
             </Flex>
         </div>

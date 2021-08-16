@@ -118,7 +118,7 @@ async function disconnect() {
 }
 
 async function onStateChange(state) {
-    console.debug('[ 🔄 Waves Keeper state ] : ', state)
+    console.debug('[ 🔄 Waves Keeper state ] : ', `version: ${state.version}, initialized: ${state.initialized ? 'true' : 'false'}, locked: ${state.locked ? 'true' : 'false'}`)
     if (typeof state !== 'object' || typeof state.account !== 'object' || typeof state.network !== 'object') {
         return
     }

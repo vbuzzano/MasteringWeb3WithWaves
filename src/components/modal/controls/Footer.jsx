@@ -1,16 +1,15 @@
-import styled from 'styled-components';
+import styled from 'styled-components'
 
-import { Flex } from '../../shared';
+import { Flex } from '../../shared'
 
 const Border = styled.div`
-    border-top: 1px solid ${({ theme: { colors } }) => colors.gray[2]};
-`;
-
+    border-top: 1px solid #000000;
+`
 const Footer = styled(Flex).attrs({
     as: Border,
-    bg: 'gray.0',
+    bg: '#111',
     justifyContent: 'flex-end',
     px: '10px',
-})``;
+})``
 
-export default Footer;
+export default Footer

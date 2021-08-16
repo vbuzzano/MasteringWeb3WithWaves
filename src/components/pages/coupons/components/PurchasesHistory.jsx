@@ -3,21 +3,26 @@ import React, { useEffect, useState } from 'react'
 
 import { Purchases } from '../../../../containers'
 import { DATA, fetchUserPurchases, subscribe } from '../../../../libs/dApp'
+import { Loading } from '../../../shared'
 
-const MyPurchases = ({ account, setActiveUrl }) => {
-    const [purchases, updatePurchases] = useState([])
+const PurchasesHistory = ({ account, setActiveUrl }) => {
+    const [loadingData, setLoadingData] = useState(true)
+    const [items, updateItems] = useState([])
     const { address } = account
 
     useEffect(() => {
         async function refreshData() {
+            setLoadingData(true)
             try {
                 // purchases history
                 const list = await fetchUserPurchases(address)
                 const historyList = list.sort((a, b) => a.timestamp < b.timestamp)
                 console.debug('[ 🔄 Purchases History ] :', `${historyList.length} purchases loaded`)
-                updatePurchases(historyList)
+                updateItems(historyList)
             } catch (error) {
                 console.error(error)
+            } finally {
+                setLoadingData(false)
             }
         }
         return subscribe(DATA, refreshData)
@@ -25,15 +30,17 @@ const MyPurchases = ({ account, setActiveUrl }) => {
 
     return (
         <>
-            <div>
-                <Purchases
-                    setActiveUrl={setActiveUrl}
-                    purchases={purchases}
-                />
-            </div>
+            {loadingData ? (<Loading />) : null }
+            <Purchases
+                hideEmptyListMessage={loadingData}
+                setActiveUrl={setActiveUrl}
+                items={items}
+                mode="history"
+                enableVoting
+            />
         </>
 
     )
 }
 
-export default MyPurchases
+export default PurchasesHistory

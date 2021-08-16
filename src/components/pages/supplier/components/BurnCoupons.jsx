@@ -2,26 +2,30 @@
 /* eslint-disable react/no-unescaped-entities */
 import React, { useEffect, useState } from 'react'
 
-import { Purchases } from '../../../../containers'
+import { CouponsList } from '../../../../containers'
 import {
-    burnCoupon, DATA, fetchSupplierReceivedCoupons, subscribe,
+    DATA, fetchSupplierReceivedCoupons, subscribe,
 } from '../../../../libs/dApp'
+import { Loading } from '../../../shared'
 
 function BurnCoupons({ account, setActiveUrl }) {
-    const [loading, setLoading] = useState(false)
-    const [purchases, updatePurchases] = useState([])
+    const [loadingData, setLoadingData] = useState(true)
+    const [items, updateItems] = useState([])
 
     useEffect(() => {
         async function refreshData() {
+            setLoadingData(true)
             try {
                 // purchases to approve
                 const { address } = account
                 const list = await fetchSupplierReceivedCoupons(address)
                 const receivedList = list.sort((a, b) => a.timestamp < b.timestamp)
                 console.debug('[ 🔄 Purchases ] :', `${receivedList.length} received coupons loaded`)
-                updatePurchases(receivedList)
+                updateItems(receivedList)
             } catch (error) {
                 console.error(error)
+            } finally {
+                setLoadingData(false)
             }
         }
         return subscribe(DATA, refreshData)
@@ -29,22 +33,13 @@ function BurnCoupons({ account, setActiveUrl }) {
 
     return (
         <>
-            <Purchases
-                isManage="burn"
-                loading={loading}
-                purchases={purchases}
+            {loadingData ? (<Loading />) : null }
+            <CouponsList
+                isManager
+                mode="burn"
+                items={items}
                 setActiveUrl={setActiveUrl}
-                onBurn={async (purchase) => {
-                    setLoading(true)
-                    try {
-                        await burnCoupon(purchase?.assetId)
-                    } catch (error) {
-                        alert(error.message)
-                        console.error(error)
-                    } finally {
-                        setLoading(false)
-                    }
-                }}
+                hideEmptyListMessage={loadingData}
             />
         </>
     )

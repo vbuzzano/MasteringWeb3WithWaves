@@ -2,18 +2,17 @@
 /* eslint-disable react/no-unescaped-entities */
 import React, { useEffect, useState } from 'react'
 
-import { Purchases } from '../../../../containers'
-import {
-    burnCoupon,
-    DATA, fetchSupplierAvailableCoupons, subscribe, withdrawFunds,
-} from '../../../../libs/dApp'
+import { CouponsList } from '../../../../containers'
+import { DATA, fetchSupplierAvailableCoupons, subscribe } from '../../../../libs/dApp'
+import { Loading } from '../../../shared'
 
 function WithdrawFunds({ account, setActiveUrl }) {
-    const [loading, setLoading] = useState(false)
-    const [purchases, updatePurchases] = useState([])
+    const [loadingData, setLoadingData] = useState(true)
+    const [items, updateItems] = useState([])
 
     useEffect(() => {
         async function refreshData() {
+            setLoadingData(true)
             try {
                 // purchases to approve
                 const { address } = account
@@ -21,9 +20,11 @@ function WithdrawFunds({ account, setActiveUrl }) {
                 const availableList = list.sort((a, b) => a.timestamp < b.timestamp)
                 console.debug('[ 🔄 Purchases ] :', `${availableList.length} available coupons loaded`)
 
-                updatePurchases(availableList)
+                updateItems(availableList)
             } catch (error) {
                 console.error(error)
+            } finally {
+                setLoadingData(false)
             }
         }
         return subscribe(DATA, refreshData)
@@ -31,26 +32,13 @@ function WithdrawFunds({ account, setActiveUrl }) {
 
     return (
         <>
-            <Purchases
-                isManage="withdraw"
-                loading={loading}
-                purchases={purchases}
+            {loadingData ? (<Loading />) : null }
+            <CouponsList
+                items={items}
+                isManager
+                mode="withdraw"
                 setActiveUrl={setActiveUrl}
-                onWithdraw={async (purchase) => {
-                    setLoading(true)
-                    try {
-                        if (purchase.isExpired || purchase.isBurned) {
-                            await withdrawFunds(purchase)
-                        } else if (purchase.isOwned) {
-                            await burnCoupon(purchase)
-                        }
-                    } catch (error) {
-                        alert(error.message)
-                        console.error(error)
-                    } finally {
-                        setLoading(false)
-                    }
-                }}
+                hideEmptyListMessage={loadingData}
             />
         </>
     )

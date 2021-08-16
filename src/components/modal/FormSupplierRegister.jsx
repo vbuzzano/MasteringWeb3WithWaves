@@ -39,7 +39,7 @@ const FormSupplierRegister = ({
             as="form"
             onSubmit={handleSubmit(onSubmit)}
         >
-            <Box bg="gray.0">
+            <Box bg="gray.0" className="rounded">
                 <Flex p="10px" justifyContent="center">
                     <h2>Register as supplier</h2>
                 </Flex>
@@ -87,18 +87,18 @@ const FormSupplierRegister = ({
                 </Flex>
             </Box>
 
-            <Controls.Footer>
+            <div className="text-center">
                 { buttons.includes('cancel') ? (
-                    <Controls.Button color="white.0" type="button" onClick={onClose}>
+                    <button className="btn btn-secondary" type="button" onClick={onClose}>
                         Cancel
-                    </Controls.Button>
+                    </button>
                 ) : '' }
                 { buttons.includes('submit') ? (
-                    <Controls.Button color="blue.0" type="submit">
+                    <button className="btn btn-primary" type="submit">
                         Register
-                    </Controls.Button>
+                    </button>
                 ) : '' }
-            </Controls.Footer>
+            </div>
         </Box>
     )
 }

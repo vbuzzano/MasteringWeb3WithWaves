@@ -1,19 +1,19 @@
-import styled from 'styled-components';
+import styled from 'styled-components'
 
-import { Box } from '../shared';
+import { Box } from '../shared'
 
 export const overlayAnimation = {
     classNames: 'overlay',
     timeout: 350,
-};
+}
 
-const Overlay = styled(Box).attrs({
+const Overlay = (zIndex = 9) => styled(Box).attrs({
     bg: 'rgba(0,0,0,.75)',
     bottom: '0px',
     left: '0px',
     position: 'fixed',
     right: '0px',
-    zIndex: 9,
+    zIndex,
 })`
     &.${overlayAnimation.classNames}-enter {
         opacity: 0;
@@ -30,6 +30,6 @@ const Overlay = styled(Box).attrs({
         opacity: 0;
         transition: opacity ${overlayAnimation.timeout}ms ease-out;
     }
-`;
+`
 
-export default Overlay;
+export default Overlay

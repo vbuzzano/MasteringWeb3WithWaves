@@ -23,12 +23,13 @@ const Coupon = ({
     oldPrice,
     newPrice,
     discount,
+    isExpired,
     onClick,
     couponPrice,
     expirationDate,
     ...rest
 }) => (
-    <Box bg="gray.0" width="300px" height="300px" position="relative" onClick={onClick} {...rest}>
+    <Box width="300px" height="300px" position="relative" onClick={onClick} {...rest}>
         <Box position="relative">
             <Box
                 height="117px"
@@ -36,9 +37,8 @@ const Coupon = ({
             />
             {!isEmpty(expirationDate) && (
                 <Box position="absolute" bottom="0px" left="0px">
-                    <Text bg="gray.0" color="white.0">
-                        Expire  &nbsp;
-                        {`${expirationDate}`}
+                    <Text>
+                        {isExpired ? (<span className="badge badge-warning ml-1">expired</span>) : (<span className="badge badge-light">{`expire ${expirationDate}`}</span>) }
                     </Text>
                 </Box>
             )}

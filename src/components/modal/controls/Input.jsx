@@ -32,7 +32,7 @@ InputStyled.defaultProps = {
 }
 
 const Input = ({
-    title, control, forwardRef, error, ...props
+    title, control, forwardRef, error, maxlength, ...props
 }) => (
     <>
         <Text color={error ? 'red.0' : 'black.0'} fontWeight="500">

@@ -26,10 +26,10 @@ window.app = dApp
 
 export default function* wavesInit() {
     try {
-        console.debug('WavesInit: fetchData')
+        console.debug('[ 🔄 WavesInit ] :', 'fetchData')
         yield call(fetchData)
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 
 /*

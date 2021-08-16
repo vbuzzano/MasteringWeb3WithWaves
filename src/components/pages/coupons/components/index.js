@@ -1,3 +1,5 @@
 export { default as Menu } from './Menu'
-export { default as MyCoupons } from './MyCoupons'
-export { default as MyPurchases } from './MyPurchases'
+export { default as ActiveCoupons } from './ActiveCoupons'
+export { default as PurchasesHistory } from './PurchasesHistory'
+export { default as UsedCoupons } from './UsedCoupons'
+export { default as ExpiredCoupons } from './ExpiredCoupons'

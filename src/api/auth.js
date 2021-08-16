@@ -17,7 +17,7 @@ Auth.prototype.login = async function () {
     if (typeof WavesKeeper !== 'undefined') {
         WavesKeeper.auth(authData)
             .then(async (auth) => {
-                console.log(`👍 Successful authentication for address ${auth.address}`)
+                console.info(`👍 Successful authentication for address ${auth.address}`)
                 await this.onAccountChange(auth)
             }).catch(async (err) => {
                 if (err.message) console.error(`👎 ${err.message}`)

@@ -1,17 +1,17 @@
-import React, { useEffect } from 'react';
-import styled from 'styled-components';
+import React, { Fragment, useEffect } from 'react'
+import styled from 'styled-components'
 
-import * as Controls from './header-controls';
-import * as LINKS from './links';
-import LogoCopyright from './LogoCopyright';
-import SocialButtons from './SocialButtons';
+import * as Controls from './header-controls'
+import * as LINKS from './links'
+import LogoCopyright from './LogoCopyright'
+import SocialButtons from './SocialButtons'
 
-import { Box, Flex, Text } from '../shared';
+import { Box, Flex, Text } from '../shared'
 
 export const menuAnimation = {
     classNames: 'mobile-menu',
     timeout: 350,
-};
+}
 
 const Container = styled(Box)`
     left: 0px;
@@ -40,22 +40,24 @@ const Container = styled(Box)`
         opacity: 0;
         transition: all ${menuAnimation.timeout}ms ease-out;
     }
-`;
+`
 
 Container.defaultProps = {
     bg: 'gray.0',
     position: 'relative',
     width: '100%',
     height: '100%',
-};
+}
 
 const textProps = {
     fontSize: '14px',
     lineHeight: '17px',
     fontWeight: '600',
-};
+}
 
-const GroupLinks = ({ title, links, ...rest }) => (
+const GroupLinks = ({
+    account, setActiveUrl, title, links, ...rest
+}) => (
     <Box {...rest}>
         {title && (
             <Text letterSpacing="0.65625px" {...textProps} pb="17px">
@@ -63,9 +65,9 @@ const GroupLinks = ({ title, links, ...rest }) => (
             </Text>
         )}
         <Box>
-            {links.map(({ title: linkTitle, url }) => (
+            {links.filter(({ isEnabled }) => typeof isEnabled !== 'function' || isEnabled(account)).map(({ url, title: linkTitle }) => (
                 <a key={url} href={url}>
-                    <Text color="blue.0" {...textProps} pb="17px">
+                    <Text color="blue.0" {...textProps} pb="17px" onClick={() => setActiveUrl(url)}>
                         {linkTitle}
                     </Text>
                 </a>
@@ -73,20 +75,54 @@ const GroupLinks = ({ title, links, ...rest }) => (
         </Box>
         <Box width="100%" height="1px" bg="gray.3" />
     </Box>
-);
+)
 
-const MobileMenu = ({ onClose, ...rest }) => {
-    useEffect(() => () => onClose(), []);
+const MobileMenu = ({
+    account, setActiveUrl, onClose, onCreateCoupon, mobileResolution, ...rest
+}) => {
+    useEffect(() => () => onClose(), [])
     return (
         <Container {...rest}>
-            <Flex justifyContent="flex-end">
-                <Controls.CloseIcon onClick={onClose} />
+            <Flex className="mb-3">
+                <Flex flex={1} justifyContent="flex-left" alignItems="center">
+                    <Fragment>
+                        {account?.isSupplier ? (
+                            <>
+                                <Box as="span" className="mx-2 text-success">
+                                    <Controls.AddCouponIcon
+                                        onClick={() => { onClose(); onCreateCoupon() }}
+                                    />
+                                </Box>
+                                <Box as="span" className="mx-2">
+                                    <a href="#supplier/approve">
+                                        <Controls.MenuItem
+                                            onClick={() => setActiveUrl('#supplier/approve')}
+                                            style={{ display: 'flex' }}
+                                        >
+                                            <Controls.ShopIcon />
+                                            { (account?.supplier?.approvalCounter > 0) ? (
+                                                <Box position="relative" top="-10px" left="-6px">
+                                                    <Controls.RoundMarkIcon />
+                                                </Box>
+                                            )
+                                                : ''
+                                            }
+                                        </Controls.MenuItem>
+                                    </a>
+                                </Box>
+                            </>
+                        ) : '' }
+                    </Fragment>
+                </Flex>
+                <Flex justifyContent="flex-end">
+                    <Controls.CloseIcon onClick={onClose} />
+                </Flex>
             </Flex>
-            <GroupLinks links={LINKS.headerLinks} />
-            <GroupLinks title="Company" links={LINKS.companyLinks} pt="20px" />
-            <GroupLinks title="Work with Coupon Bazaar" links={LINKS.workLinks} pt="20px" />
-            <GroupLinks title="More" links={LINKS.moreLinks} pt="20px" />
-            <GroupLinks title="Main" links={LINKS.mainLinks} pt="20px" />
+            <GroupLinks account={account} setActiveUrl={setActiveUrl} links={LINKS.headerLinks} />
+            <GroupLinks account={account} setActiveUrl={setActiveUrl} title="Company" links={LINKS.companyLinks} pt="20px" />
+            <GroupLinks account={account} setActiveUrl={setActiveUrl} title="Work with Coupon Bazaar" links={LINKS.myLinks} pt="20px" />
+            <GroupLinks account={account} setActiveUrl={setActiveUrl} title="Supplier" links={LINKS.supplierLinks} pt="20px" />
+            <GroupLinks account={account} setActiveUrl={setActiveUrl} title="Main" links={LINKS.mainLinks} pt="20px" />
             <Flex flexDirection="column" py="20px">
                 <Box pb="20px">
                     <LogoCopyright size="small" />
@@ -96,7 +132,7 @@ const MobileMenu = ({ onClose, ...rest }) => {
                 </Flex>
             </Flex>
         </Container>
-    );
-};
+    )
+}
 
-export default MobileMenu;
+export default MobileMenu

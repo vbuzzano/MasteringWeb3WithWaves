@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-use-before-define */
 /* eslint-disable max-len */
 import { sha256, base58encode } from '@waves/waves-crypto'
@@ -20,12 +21,46 @@ export const asyncFilter = async (arr, fn) => {
 export const getDataByKey = (key) => {
     let val = null
     if (window.dAppData && window.dAppData[key]) {
-        val = window.dAppData[key].value
+        switch (window.dAppData[key].type) {
+        case 'integer':
+            val = parseInt(window.dAppData[key].value, 10)
+            break
+
+        case 'boolean':
+            val = Boolean(window.dAppData[key].value)
+            break
+
+        default:
+            val = window.dAppData[key].value
+            break
+        }
     }
     return val
 }
 
-export const shortAddress = addr => `${addr?.substr(0, 4)}...${addr?.substr(addr?.length - 5, 4)}`
+export const shortAddress = addr => `${addr?.substr(0, 6)}...${addr?.substr(addr?.length - 5, 4)}`
+
+export const formatDate = (date, option = { locales: 'en-IN' }) => date.toLocaleDateString(option.locales)
+
+export const colorStatus = status => (
+    status === 'approval' ? 'dark'
+        : status === 'rejected' ? 'danger'
+            : status === 'accepted' ? 'success'
+                : status === 'active' ? 'success'
+                    : status === 'used' ? 'secondary'
+                        : status === 'burned' ? 'dark'
+                            : status === 'expired' ? 'warning'
+                                : 'primary')
+
+export const getSupplierData = (address) => {
+    let supplier = null
+    try {
+        supplier = JSON.parse(getDataByKey(`${address}_account`))
+    } catch (error) {
+        console.warn(error.message)
+    }
+    return supplier
+}
 
 export const formatNumber = (amt, option = { locales: 'en-IN', decimals: 8 }) => {
     const { locales, decimals } = option
@@ -35,11 +70,30 @@ export const formatNumber = (amt, option = { locales: 'en-IN', decimals: 8 }) =>
     }).format(amt / dc)
 }
 
+export const getVoting = (item, user) => {
+    const voteRound = getDataByKey(`${item.id}_voteround`) || 0
+    const voteKey = `vote${item.id}[${voteRound}]`
+    const hasPurchased = user && getDataByKey(`${user}_${item.id}_purchased`)
+
+    const voting = {
+        round: voteRound,
+        status: getDataByKey(`${voteKey}_status`) || 'voting',
+        commit: hasPurchased ? getDataByKey(`${voteKey}_${user}_commit`) : null,
+        reveal: hasPurchased ? getDataByKey(`${voteKey}_${user}_reveal`) : null,
+    }
+
+    return {
+        ...voting,
+        canCommit: hasPurchased && !voting?.commit && voting?.status === 'voting',
+        canReveal: voting?.commit && !voting?.reveal && voting?.status === 'reveal',
+    }
+}
+
 const getSupplierItemIds = address => async (data = []) => {
     const ids = []
     if (typeof data === 'object') {
         Object.keys(data).forEach((key) => {
-            const m = key.match(/^item_([^_]+)_owner$/)
+            const m = key.match(/^(item_[^_]+)_owner$/)
             if (m && m.length === 2 && data[key].value === address) {
                 ids.push(m[1])
             }
@@ -52,7 +106,7 @@ const getSupplierPurchaseIds = address => async (data = []) => {
     const ids = []
     if (typeof data === 'object') {
         Object.keys(data).forEach((key) => {
-            const m = key.match(/^purchase_([^_]+)_supplier$/)
+            const m = key.match(/^(purchase_[^_]+)_supplier$/)
             if (m && m.length === 2 && data[key].value === address) {
                 ids.push(m[1])
             }
@@ -65,7 +119,7 @@ const getUserPurchaseIds = address => async (data = []) => {
     const ids = []
     if (typeof data === 'object') {
         Object.keys(data).forEach((key) => {
-            const m = key.match(/^purchase_([^_]+)_user$/)
+            const m = key.match(/^(purchase_[^_]+)_user$/)
             if (m && m.length === 2 && data[key].value === address) {
                 ids.push(m[1])
             }
@@ -78,7 +132,7 @@ const getItemIds = async (data = []) => {
     const ids = []
     if (typeof data === 'object') {
         Object.keys(data).forEach((key) => {
-            const m = key.match(/^item_([^_]+)_owner$/)
+            const m = key.match(/^(item_[^_]+)_owner$/)
             if (m && m.length === 2) {
                 ids.push(m[1])
             }
@@ -95,18 +149,20 @@ const prepareItems = async (fnGetIds, data = null) => {
         ids.forEach((id) => {
             let item = { id, couponTerm: 'WAVES' }
             Object.keys(data).forEach((key) => {
-                if (key.startsWith(`item_${id}`)) {
-                    if (key === `item_${id}_title`) {
+                if (key.startsWith(id)) {
+                    if (key === `${id}_title`) {
                         item.title = data[key].value
-                    } else if (key === `item_${id}_price`) {
+                    } else if (key === `${id}_price`) {
                         item.couponPrice = parseInt(data[key].value, 10)
-                    } else if (key === `item_${id}_expiredate`) {
+                    } else if (key === `${id}_featured`) {
+                        item.isFeatured = Boolean(data[key].value)
+                    } else if (key === `${id}_expiredate`) {
                         const d = new Date(parseInt(data[key].value, 10))
                         const ye = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(d)
                         const me = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(d)
                         const de = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(d)
                         item.expirationDate = `${ye}-${me}-${de}`
-                    } else if (key === `item_${id}_data`) {
+                    } else if (key === `${id}_data`) {
                         const itemData = JSON.parse(data[key].value)
                         itemData.image = itemData.image ? itemData.image : 'https://cdn1.savepice.ru/uploads/2019/6/5/3eaf1f99a32f8045847ac9f02eb81344-full.png'
                         itemData.newPrice = parseInt(itemData.newPrice, 10)
@@ -131,24 +187,25 @@ const preparePurchases = async (fnGetIds) => {
     if (data) {
         const ids = await fnGetIds(data)
         ids.forEach((id) => {
-            const el = { id }
+            const el = { id, voting: {} }
             Object.keys(data).forEach((key) => {
-                if (key.startsWith(`purchase_${id}`)) {
-                    if (key === `purchase_${id}_status`) {
+                if (key.startsWith(id)) {
+                    if (key === `${id}_status`) {
                         el.status = data[key].value
-                    } else if (key === `purchase_${id}_item`) {
+                    } else if (key === `${id}_item`) {
                         el.item = data[key].value
-                    } else if (key === `purchase_${id}_supplier`) {
+                    } else if (key === `${id}_supplier`) {
                         el.supplier = data[key].value
-                    } else if (key === `purchase_${id}_user`) {
+                        el.supplierData = getSupplierData(el.supplier)
+                    } else if (key === `${id}_user`) {
                         el.user = data[key].value
-                    } else if (key === `purchase_${id}_assetId`) {
+                    } else if (key === `${id}_assetId`) {
                         el.assetId = data[key].value
-                    } else if (key === `purchase_${id}_fundpaid`) {
+                    } else if (key === `${id}_fundpaid`) {
                         el.isFundPaid = Boolean(data[key].value)
-                    } else if (key === `purchase_${id}_amount`) {
+                    } else if (key === `${id}_amount`) {
                         el.amount = parseInt(data[key].value, 10)
-                    } else if (key === `purchase_${id}_timestamp`) {
+                    } else if (key === `${id}_timestamp`) {
                         el.timestamp = parseInt(data[key].value, 10)
                     }
                 }
@@ -157,8 +214,26 @@ const preparePurchases = async (fnGetIds) => {
         })
     }
     return Promise.all(list.map(async (e) => {
+        // set item
         e.item = await getItemByKey(e.item)
-        e.isExpired = e.item?.isExpired ?? true
+
+        // set default coupon status
+        e.couponStatus = 'active'
+
+        // is expired
+        e.isExpired = e.item?.isExpired ?? false
+        e.couponStatus = e.isExpired ? 'expired' : e.couponStatus
+
+        // is Burned
+        if (e.assetId) {
+            const url = `https://api-testnet.wavesplatform.com/v0/assets/${e.assetId}`
+            const r = await fetch(url)
+            const body = r.ok && await r.json()
+            e.isBurned = r.ok && body.quantity === 0
+            e.couponStatus = e.isBurned ? 'burned' : e.couponStatus
+        }
+
+        e.isOwned = false
         return e
     }))
 }
@@ -176,49 +251,55 @@ const apiFetchItems = async () => {
     return await prepareItems(getItemIds, dataListToObj(data))
 }
 
-export const fetchUserPurchases = async address =>
-    await preparePurchases(getUserPurchaseIds(address))
+export const fetchUserPurchases = async (address) => {
+    let list = await preparePurchases(getUserPurchaseIds(address))
+    list = await Promise.all(list.map(async (e) => {
+        const { assetId } = e
+        if (typeof assetId === 'string') {
+            let url = null; let r = null; let body = null
+
+            // is owned by user
+            if (!e.isBurned) {
+                url = `https://nodes-testnet.wavesnodes.com/assets/balance/${address}/${assetId}`
+                r = await fetch(url)
+                body = r.ok && await r.json()
+                e.isOwned = r.ok && body.balance > 0
+
+                // status is active if owned
+                e.couponStatus = e.isOwned && !e.isExpired ? 'active' : e.couponStatus
+            }
+
+            // is Used
+            url = `https://api-testnet.wavesplatform.com/v0/transactions/transfer?sender=${e.user}&assetId=${assetId}&limit=1`
+            r = await fetch(url)
+            body = r.ok && await r.json()
+            e.isUsed = r.ok && body.data.length > 0
+            e.isOwned = e.isOwned && !e.isUsed
+
+            // status is use if used
+            e.couponStatus = e.isUsed ? 'used' : e.couponStatus
+        }
+        return e
+    }))
+
+    return list
+}
 
 export const fetchUserCoupons = async (address) => {
     let list = await fetchUserPurchases(address)
-    list = list.filter(e => e.status === 'accepted')
     list = await Promise.all(list.map(async (e) => {
-        const { assetId } = e
-        if (!assetId) return false
-        let url = null; let r = null; let body = null
-        // is Active
-        url = `https://nodes-testnet.wavesnodes.com/assets/balance/${address}/${assetId}`
-        r = await fetch(url)
-        body = r.ok && await r.json()
-        const isOwned = r.ok && body.balance > 0
-
-        // is Used
-        url = `https://api-testnet.wavesplatform.com/v0/transactions/transfer?sender=${e.user}&assetId=${assetId}&limit=1`
-        r = await fetch(url)
-        body = r.ok && await r.json()
-        const isUsed = r.ok && body.data.length > 0
-
-        e.isOwned = isOwned && !isUsed
-        e.isUsed = isUsed
-        if (e.isUsed) e.status = 'used'
-
+        if (!e.isExpired) {
+            const { item, user } = e
+            e.voting = getVoting(item, user)
+        }
         return e
     }))
-    return list
+    return list.filter(e => typeof e.assetId === 'string')
 }
 
 export const fetchUserActiveCoupons = async (address) => {
     const list = await fetchUserCoupons(address)
-    return list.filter(e => e.isOwned)
-/*    const activeList = await asyncFilter(list, async (e) => {
-        const { assetId } = e
-        if (!assetId) return false
-        const url = `https://nodes-testnet.wavesnodes.com/assets/balance/${address}/${assetId}`
-        const r = await fetch(url)
-        const body = r.ok && await r.json()
-        return r.ok && body.balance > 0
-    })
-*/
+    return list.filter(e => e.isOwned && !e.isExpired)
 }
 
 export const fetchUserUsedCoupons = async (address) => {
@@ -226,39 +307,47 @@ export const fetchUserUsedCoupons = async (address) => {
     return list.filter(e => e.isUsed)
 }
 
+export const fetchUserExpiredCoupons = async (address) => {
+    const list = await fetchUserCoupons(address)
+    return list.filter(e => e.isOwned && e.isExpired)
+}
+
 export const fetchSupplierItems = async address =>
     await prepareItems(getSupplierItemIds(address))
 
 export const fetchSupplierPurchases = async (address) => {
-    const list = await preparePurchases(getSupplierPurchaseIds(address))
-    return list
-}
-export const fetchSupplierCoupons = async (address) => {
-    let list = await fetchSupplierPurchases(address)
-    list = list.filter(e => e.status === 'accepted')
+    let list = await preparePurchases(getSupplierPurchaseIds(address))
     list = await Promise.all(list.map(async (e) => {
         const { assetId } = e
-        if (!assetId) return false
-        let url = null; let r = null; let body = null
-        // is Received
-        url = `https://api-testnet.wavesplatform.com/v0/transactions/transfer?recipient=${e.supplier}&assetId=${assetId}&limit=1`
-        r = await fetch(url)
-        body = r.ok && await r.json()
-        const isReceived = r.ok && body.data.length > 0
+        if (assetId) {
+            let url = null; let r = null; let body = null
 
-        // is Owned
-        url = `https://nodes-testnet.wavesnodes.com/assets/balance/${address}/${assetId}`
-        r = await fetch(url)
-        body = r.ok && await r.json()
-        const isOwned = r.ok && body.balance > 0
-        e.isOwned = isOwned && isReceived
-        e.isBurned = isReceived && !isOwned
-        if (e.isOwned) e.status = 'used'
-        if (e.isBurned) e.status = 'burned'
+            // is Received
+            url = `https://api-testnet.wavesplatform.com/v0/transactions/transfer?recipient=${e.supplier}&assetId=${assetId}&limit=1`
+            r = await fetch(url)
+            body = r.ok && await r.json()
+            e.isReceived = r.ok && body.data.length > 0
+            e.couponStatus = e.isReceived ? 'used' : e.couponStatus
+
+            // is Owned
+            if (e.isReceived && !e.isBurned) {
+                url = `https://nodes-testnet.wavesnodes.com/assets/balance/${address}/${assetId}`
+                r = await fetch(url)
+                body = r.ok && await r.json()
+                e.isOwned = r.ok && body.balance > 0
+            }
+
+            e.couponStatus = e.isFundPaid ? 'paid' : e.couponStatus
+        }
 
         return e
     }))
+
     return list
+}
+export const fetchSupplierCoupons = async (address) => {
+    const list = await fetchSupplierPurchases(address)
+    return list.filter(e => typeof e.assetId === 'string')
 }
 
 export const fetchSupplierActiveCoupons = async (address) => {
@@ -272,10 +361,8 @@ export const fetchSupplierReceivedCoupons = async (address) => {
 }
 
 export const fetchSupplierAvailableCoupons = async (address) => {
-    let list = await fetchSupplierCoupons(address)
-    list = list.filter(e => !e.isFundPaid)
-    list.map(e => console.info(e.id, e.isExpired, e.isBurned, e.isOwned))
-    return list.filter(e => (
+    const list = await fetchSupplierCoupons(address)
+    return list.filter(e => !e.isFundPaid).filter(e => (
         e.isExpired || e.isBurned || e.isOwned
     ))
 }
@@ -286,12 +373,12 @@ export const fetchSupplierAvailableFunds = async (address) => {
 }
 
 export const getItemByKey = async (key) => {
-    const items = await prepareItems(async () => [key.startsWith('item_') ? key.substr(5) : key])
+    const items = await prepareItems(async () => [key])
     return items.length > 0 ? items[0] : null
 }
 
 export const getPurchaseByKey = async (key) => {
-    const list = await preparePurchases(async () => [key.startsWith('purchase_') ? key.substr(9) : key])
+    const list = await preparePurchases(async () => [key])
     return list.length > 0 ? list[0] : null
 }
 

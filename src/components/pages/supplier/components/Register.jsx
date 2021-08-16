@@ -1,52 +1,63 @@
 /* eslint-disable no-alert */
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
-import { FormSupplierRegister, Result } from '../../../modal'
-import { Modal } from '../../../shared'
+import {
+    ErrorDialog, FormSupplierRegister, Result,
+} from '../../../modal'
+import { Loading, Modal } from '../../../shared'
 import { registerSupplier } from '../../../../libs/dApp'
-import { useAppDialogs } from '../../../service'
 
 function Register({ account }) {
-    const {
-        result: [resultOpened, onResultOpen, onResultClose],
-        form: [formOpened, onFormOpen, onFormClose],
-    } = useAppDialogs()
+    const [loading, setLoading] = useState(false)
+    const [loadingData, setLoadingData] = useState(true)
+    const [resultOpened, setResultOpen] = useState(false)
+    const [formOpened, setFormOpen] = useState(false)
+    const [errorResult, setErrorResult] = useState(false)
 
     useEffect(() => {
-        if (!account.isSupplier && !formOpened) {
-            onFormOpen()
-        }
+        setTimeout(() => {
+            setLoadingData(false)
+            if (!account.isSupplier && !formOpened) {
+                setFormOpen(true)
+            }
+        }, 500)
     }, [account])
 
     return (
         <>
+            {loadingData ? (<Loading />) : null }
             {formOpened && !account.isSupplier ? (
                 <FormSupplierRegister
                     as="div"
                     buttons={['submit']}
                     onClose={async () => {
-                        onFormClose()
+                        setFormOpen(false)
                     }}
                     onSubmit={async (data) => {
+                        setLoading('Registering as supplier ...')
                         try {
                             await registerSupplier(data)
-                            // onAccountChange()
-                            onFormClose()
-                            onResultOpen()
+                            setResultOpen(true)
                         } catch (error) {
-                            alert(error.message)
+                            setErrorResult(error)
                             console.error(error)
+                        } finally {
+                            setLoading(false)
                         }
                     }}
                 />
             ) : '' }
 
-            <Modal open={resultOpened} onClose={onResultClose}>
+            <Modal open={resultOpened} onClose={() => setResultOpen(false)}>
                 <Result
                     text="<div class='alert alert-success'>Registration successful!</div><div>You are now a supplier.<br/><br/></div><div>Click on <b>Manage Coupons</b> to add / update / remove coupons.</div>"
-                    onClose={onResultClose}
+                    onClose={() => setResultOpen(false)}
                 />
             </Modal>
+            <Modal open={typeof loading === 'string'} onClose={() => setLoading(false)}>
+                <Loading className="bg-dark" text={loading} />
+            </Modal>
+            <ErrorDialog className="bg-dark" text={errorResult?.message} open={typeof errorResult === 'object'} onClose={() => setErrorResult(false)} />
         </>
     )
 }

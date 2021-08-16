@@ -6,22 +6,26 @@ import { Purchases } from '../../../../containers'
 import {
     DATA, fetchSupplierPurchases, subscribe,
 } from '../../../../libs/dApp'
+import { Loading } from '../../../shared'
 
 function PurchasesHistory({ account, setActiveUrl }) {
-    const [purchases, updatePurchases] = useState([])
+    const [loadingData, setLoadingData] = useState(true)
+    const [items, updateItems] = useState([])
 
     useEffect(() => {
         async function refreshData() {
+            setLoadingData(true)
             try {
                 // purchases history
                 const { address } = account
-                console.log(address)
                 const list = await fetchSupplierPurchases(address)
                 const historyList = list.filter(s => s.status !== 'approval').sort((a, b) => a.timestamp < b.timestamp)
                 console.debug('[ 🔄 Purchases History ] :', `${historyList.length} purchases loaded`)
-                updatePurchases(historyList)
+                updateItems(historyList)
             } catch (error) {
                 console.error(error)
+            } finally {
+                setLoadingData(false)
             }
         }
         return subscribe(DATA, refreshData)
@@ -29,10 +33,13 @@ function PurchasesHistory({ account, setActiveUrl }) {
 
     return (
         <>
+            {loadingData ? (<Loading />) : null }
             <Purchases
-                isManage="history"
-                purchases={purchases}
+                isManager
+                mode="history"
+                items={items}
                 setActiveUrl={setActiveUrl}
+                hideEmptyListMessage={loadingData}
             />
         </>
     )

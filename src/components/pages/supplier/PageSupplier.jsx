@@ -8,31 +8,36 @@ import Manager from './components/Manager'
 
 import { Box } from '../../shared'
 import { connect } from '../../../libs/dApp'
-import BTCreateCoupon from '../../custom/btCreateCoupon'
+import { useCouponDialogs } from '../../service'
 
 const PageSupplier = ({
     account, activeUrl, setActiveUrl,
-}) => (
+}) => {
+    const {
+        CouponDialogs,
+        form: [formOpened, onFormOpen],
+    } = useCouponDialogs()
+
+    const onCreateCoupon = async () => {
+        onFormOpen()
+    }
+    return (
         <>
+            <CouponDialogs />
+
             {account.isSupplier && activeUrl.indexOf('#supplier/register') === -1 ? (
                 <>
-                <BalancePanel account={account} />
-
-                <div className="alert alert-dark text-center">
-                    <BTCreateCoupon setActiveUrl={setActiveUrl} />
-                </div>
-
                 <Menu
                     activeUrl={activeUrl}
                     setActiveUrl={setActiveUrl}
                     approvalCounter={account?.supplier?.approvalCounter}
+                    onCreateCoupon={onCreateCoupon}
                 />
-
                 { account.isConnected ? (
                     <>
                     {activeUrl.match(new RegExp('.*/?(#supplier[^/]*|#supplier/manage.*)$')) ? (
                         <>
-                        <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary" role="alert">
                             <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -48,24 +53,19 @@ const PageSupplier = ({
                                 </b>
                             </small>
                         </Box>
-                        <Manager
-                            account={account}
-                        />
+                        <Manager account={account} />
                         </>
-                    ) : '' }
+                    ) : null }
 
                     {activeUrl.match(new RegExp('.*/?#supplier/history.*$')) ? (
                         <>
-                        <PurchasesHistory
-                            account={account}
-                            setActiveUrl={setActiveUrl}
-                        />
+                            <PurchasesHistory account={account} setActiveUrl={setActiveUrl} />
                         </>
-                    ) : '' }
+                    ) : null }
 
                     {activeUrl.match(new RegExp('.*/?#supplier/approve.*$')) ? (
                         <>
-                        <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary" role="alert">
                             <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -83,11 +83,12 @@ const PageSupplier = ({
                             setActiveUrl={setActiveUrl}
                         />
                         </>
-                    ) : '' }
+                    ) : null }
 
                     {activeUrl.match(new RegExp('.*/?#supplier/withdraw.*$')) ? (
                         <>
-                        <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                        <BalancePanel account={account} />
+                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary" role="alert">
                             <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -104,11 +105,11 @@ const PageSupplier = ({
                             setActiveUrl={setActiveUrl}
                         />
                         </>
-                    ) : '' }
+                    ) : null }
 
                     {activeUrl.match(new RegExp('.*/?#supplier/burn.*$')) ? (
                         <>
-                        <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary" role="alert">
                             <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -122,7 +123,7 @@ const PageSupplier = ({
                             </small>
                         </Box>
                         </>
-                    ) : '' }
+                    ) : null }
                     </>
                 ) : (
                     <div className="alert alert-warning text-center">
@@ -135,7 +136,7 @@ const PageSupplier = ({
 
             <Register account={account} />
         </>
-)
-
+    )
+}
 export default PageSupplier
 

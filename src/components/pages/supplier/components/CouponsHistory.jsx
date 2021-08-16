@@ -2,13 +2,13 @@
 /* eslint-disable react/no-unescaped-entities */
 import React, { useEffect, useState } from 'react'
 
-import { Purchases } from '../../../../containers'
+import { CouponsList } from '../../../../containers'
 import {
     DATA, fetchSupplierPurchases, subscribe,
 } from '../../../../libs/dApp'
 import { Loading } from '../../../shared'
 
-function PurchasesApprove({ account, setActiveUrl }) {
+function PurchasesHistory({ account, setActiveUrl }) {
     const [loadingData, setLoadingData] = useState(true)
     const [items, updateItems] = useState([])
 
@@ -16,12 +16,12 @@ function PurchasesApprove({ account, setActiveUrl }) {
         async function refreshData() {
             setLoadingData(true)
             try {
-                // purchases to approve
+                // purchases history
                 const { address } = account
                 const list = await fetchSupplierPurchases(address)
-                const approveList = list.filter(s => s.status === 'approval').sort((a, b) => a.timestamp < b.timestamp)
-                console.debug('[ 🔄 Purchases ] :', `${approveList.length} purchases to approve loaded`)
-                updateItems(approveList)
+                const historyList = list.filter(s => s.status !== 'approval').sort((a, b) => a.timestamp < b.timestamp)
+                console.debug('[ 🔄 Purchases History ] :', `${historyList.length} purchases loaded`)
+                updateItems(historyList)
             } catch (error) {
                 console.error(error)
             } finally {
@@ -34,9 +34,9 @@ function PurchasesApprove({ account, setActiveUrl }) {
     return (
         <>
             {loadingData ? (<Loading />) : null }
-            <Purchases
+            <CouponsList
                 isManager
-                mode="approval"
+                mode="history"
                 items={items}
                 setActiveUrl={setActiveUrl}
                 hideEmptyListMessage={loadingData}
@@ -45,4 +45,4 @@ function PurchasesApprove({ account, setActiveUrl }) {
     )
 }
 
-export default PurchasesApprove
+export default PurchasesHistory

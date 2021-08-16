@@ -1,7 +1,9 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
 
-import { Menu, MyCoupons, MyPurchases } from './components'
+import {
+    ActiveCoupons, ExpiredCoupons, Menu, PurchasesHistory,
+} from './components'
 import UsedCoupons from './components/UsedCoupons'
 
 import { connect } from '../../../libs/dApp'
@@ -33,7 +35,7 @@ const PageCoupons = ({
                                     </b>
                                 </small>
                             </Box>
-                            <MyCoupons account={account} setActiveUrl={setActiveUrl} />
+                            <ActiveCoupons account={account} setActiveUrl={setActiveUrl} />
                             </>
                         ) : ''
                     }
@@ -53,6 +55,21 @@ const PageCoupons = ({
                         ) : ''
                     }
 
+                    {activeUrl.match(new RegExp('.*/?#my/expired.*$'))
+                        ? (
+                            <>
+                            <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                                <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                    Find here all expired coupons
+                                <br />
+                            </Box>
+                            <ExpiredCoupons account={account} setActiveUrl={setActiveUrl} />
+                            </>
+                        ) : ''
+                    }
+
                     {activeUrl.match(new RegExp('.*/?#my/purchases.*$'))
                         ? (
                             <>
@@ -64,7 +81,7 @@ const PageCoupons = ({
                                 <br />
                                 <small>(Waiting approval, Rejected or Accepted)</small>
                             </Box>
-                            <MyPurchases account={account} setActiveUrl={setActiveUrl} />
+                            <PurchasesHistory account={account} setActiveUrl={setActiveUrl} />
                             </>
                         ) : ''
                     }

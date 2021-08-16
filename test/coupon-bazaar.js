@@ -147,9 +147,11 @@ describe('Coupon Bazaar test suite', async () => {
         const tx = setScript({ script }, accounts.dApp)
         await broadcast(tx) && await waitForTx(tx.id)
         console.log('Script has been set')
+
+        console.log('dApp Public Key', publicKey(accounts.dApp))
     })
 
-    it('Supplier may register', async () => {
+    it('User can register as Supplier', async () => {
         const tx = invokeScript({
             dApp: address(accounts.dApp),
             call: {
@@ -409,7 +411,7 @@ describe('Coupon Bazaar test suite', async () => {
         await broadcast(tx) && await waitForTx(tx.id)
     })
 
-    it('Supplier can withdraw funds (price amount) from expire coupon', async () => {
+    it('Supplier can withdraw funds (price amount) from expired coupon', async () => {
         let tx = null
         // expire item 1
         tx = invokeScript(getUpdateTxData(itemIds[1], 'Coupon 2', 2000, '2019-12-31'), accounts.supplier1)
@@ -462,12 +464,13 @@ describe('Coupon Bazaar test suite', async () => {
                 payment: [],
             }, seed)
             await broadcast(tx)
-            await waitForTx(tx.id)
+            return await waitForTx(tx.id)
         }
 
-        await commitVote(itemIds[2], votes[0], salts[0], accounts.user0)
-        await commitVote(itemIds[2], votes[1], salts[1], accounts.user1)
-        await commitVote(itemIds[2], votes[2], salts[2], accounts.user2)
+        let res = null
+        res = await commitVote(itemIds[2], votes[0], salts[0], accounts.user0)
+        res = await commitVote(itemIds[2], votes[1], salts[1], accounts.user1)
+        res = await commitVote(itemIds[2], votes[2], salts[2], accounts.user2)
     })
 
     it('User can reveal votes', async () => {
@@ -485,11 +488,13 @@ describe('Coupon Bazaar test suite', async () => {
                 payment: [],
             }, seed)
             const tx = await broadcast(ts)
-            await waitForTx(tx.id)
+            return await waitForTx(tx.id)
         }
-        await revealVote(itemIds[2], votes[0], salts[0], accounts.user0)
-        await revealVote(itemIds[2], votes[1], salts[1], accounts.user1)
-        await revealVote(itemIds[2], votes[2], salts[2], accounts.user2)
+        let res = null
+        res = await revealVote(itemIds[2], votes[0], salts[0], accounts.user0)
+        res = await revealVote(itemIds[2], votes[1], salts[1], accounts.user1)
+        res = await revealVote(itemIds[2], votes[2], salts[2], accounts.user2)
+
     })
 
     it('Supplier can remove coupon by setting it as removed when purchased or used ', async () => {

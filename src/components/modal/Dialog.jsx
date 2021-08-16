@@ -5,21 +5,27 @@ import * as Controls from './controls'
 
 import { Box, Flex, Text } from '../shared'
 import Coupon from '../coupon'
-import { connect } from '../../libs/dApp'
+import { colorStatus, connect, shortAddress } from '../../libs/dApp'
+import Badge from '../shared/Badge'
+import BTVoting from '../custom/btVoting'
 
 const Dialog = ({
-    buttons, coupon, onClose, onEdit, onBuy, onRemove, onUse, onBurn, onVote,
+    buttons, coupon, onClose, onEdit, onBuy, onRemove, onUse, onBurn, onVote, onReveal, onWithdraw, onAccept, onReject,
 }) => {
     buttons ??= ['cancel', 'buy']
-console.info(buttons)
     return (
         <>
         <Box width="600px">
-            <Flex bg="gray.0" p="16px">
-                <Box flex={1}>
-                    <Coupon {...(coupon.item || coupon)} />
-                </Box>
+            <Flex p="16px" bg="gray.0" className="rounded">
+                <div className={coupon.isExpired ? 'alert alert-danger p-1 m-0' : ''}>
+                    <Box flex={1}>
+                        <Coupon {...(coupon.item || coupon)} />
+                        {coupon.isExpired ? (
+                            <div className="p-1 text-center" style={{ backgroundColor: 'rgba(255,255,255,0.5)' }}>This coupon has expired</div>
+                        ) : null}
 
+                    </Box>
+                </div>
                 <Box pl="16px">
                     <Controls.SmallLogo />
                     <Text lineHeight="22px" fontWeight="bold" pt="10px" fontSize="22px">
@@ -28,65 +34,113 @@ console.info(buttons)
                     <Text lineHeight="18px" pt="10px" fontSize="14px">
                         { coupon.item?.longDescription || coupon.item?.shortDescription || coupon.longDescription || coupon.shortDescription }
                     </Text>
+                    {coupon.assetId ? (
+                        <>
+                        <Text lineHeight="18px" pt="10px" fontSize="12px">
+                            {'nft: '}
+                            <a href={`https://testnet.wavesexplorer.com/assets/${coupon.assetId}/`} target="_blank" rel="noreferrer">{shortAddress(coupon.assetId)}</a>
+                        </Text>
+                        <Text lineHeight="18px" pt="10px" fontSize="12px">
+                            {'supplier: '}
+                            <a href={`https://testnet.wavesexplorer.com/address/${coupon.supplier}/`} target="_blank" rel="noreferrer">
+                                {coupon.supplierData?.name || shortAddress(coupon.supplier)}
+                            </a>
+                        </Text>
+                        <Text lineHeight="18px" pt="10px" fontSize="12px">
+                            {'status: '}
+                            <Badge text={coupon.couponStatus} type={colorStatus(coupon.couponStatus)} p={0} />
+                        </Text>
+                        </>
+                    ) : null }
                 </Box>
             </Flex>
 
             <Controls.Footer>
-                <Controls.Button onClick={onClose}>Cancel</Controls.Button>
+                <Controls.Button className="text-secondary" onClick={onClose}>Cancel</Controls.Button>
                 { buttons.includes('login')
                     ? (
-                        <Controls.Button color="blue.0" onClick={connect}>
+                        <Controls.Button className="text-primary" onClick={connect}>
                         Login
                         </Controls.Button>
                     )
-                    : ''
+                    : null
                 }
-                { buttons.includes('buy')
+
+                { buttons.includes('vote') && !coupon.isExpired
                     ? (
-                        <Controls.Button color="blue.0" onClick={onBuy}>
+                        <BTVoting
+                            item={coupon.item || coupon}
+                            voting={coupon.voting}
+                            onCommitVote={onVote}
+                            onRevealVote={onReveal}
+                            buttonClassName="text-warning font-weight-bold"
+                            textClassName="text-white-50 font-weight-bold small pt-1 mt-2"
+                            style={{ fontSize: '18px' }}
+                        />
+                    ) : null
+                }
+
+                { buttons.includes('buy') && !coupon.isExpired
+                    ? (
+                        <Controls.Button className="text-success" onClick={onBuy}>
                         Buy
                         </Controls.Button>
                     )
-                    : ''
+                    : null
                 }
 
                 { buttons.includes('edit') ? (
-                    <Controls.Button color="blue.0" onClick={onEdit}>
+                    <Controls.Button className="text-primary" onClick={onEdit}>
                         Edit
                     </Controls.Button>
-                ) : '' }
+                ) : null }
 
                 { buttons.includes('remove') ? (
-                    <Controls.Button color="red.0" onClick={onRemove}>
+                    <Controls.Button className="text-danger" onClick={onRemove}>
                         Remove
                     </Controls.Button>
-                ) : '' }
+                ) : null }
 
-                { buttons.includes('use')
+                { buttons.includes('use') && coupon.isOwned
                     ? (
-                        <Controls.Button color="blue.0" onClick={onUse}>
+                        <Controls.Button className="text-success" onClick={onUse}>
                         Use coupon
                         </Controls.Button>
                     )
-                    : ''
+                    : null
                 }
 
-                { buttons.includes('vote')
+                { buttons.includes('burn')
                     ? (
-                        <Controls.Button color="blue.0" onClick={onVote}>
-                        Vote
-                        </Controls.Button>
-                    )
-                    : ''
-                }
-
-                { buttons.includes('burn') && (coupon.canBurn || coupon.item?.canBurn)
-                    ? (
-                        <Controls.Button color="blue.0" onClick={onBurn}>
+                        <Controls.Button color="text-primary" onClick={onBurn}>
                         Burn
                         </Controls.Button>
                     )
-                    : ''
+                    : null
+                }
+                { buttons.includes('withdraw')
+                    ? (
+                        <Controls.Button className="text-success" onClick={onWithdraw}>
+                        Withdraw Fund
+                        </Controls.Button>
+                    )
+                    : null
+                }
+                { buttons.includes('reject')
+                    ? (
+                        <Controls.Button className="text-danger" onClick={onReject}>
+                        Reject
+                        </Controls.Button>
+                    )
+                    : null
+                }
+                { buttons.includes('accept')
+                    ? (
+                        <Controls.Button className="text-success" onClick={onAccept}>
+                        Confirm
+                        </Controls.Button>
+                    )
+                    : null
                 }
             </Controls.Footer>
         </Box>

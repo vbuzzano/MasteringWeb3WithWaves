@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/accessible-emoji */
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable max-len */
 import React from 'react'
 import useForm from 'react-hook-form'
@@ -6,12 +8,11 @@ import * as Controls from './controls'
 
 import { Box } from '../shared'
 
-const FormVote = ({
-    buttons, onClose, onSubmit, item,
+const FormReveal = ({
+    buttons, onClose, onSubmit, item, voting,
 }) => {
     const { register, handleSubmit, errors } = useForm()
     buttons ??= ['submit', 'cancel']
-    const vote = item?.isFeatured ? 'delisted' : 'featured'
     return (
         <Box
             width="80%"
@@ -32,60 +33,28 @@ const FormVote = ({
                 forwardRef={register({ required: false })}
 
             />
+
             <Controls.Input
                 type="hidden"
-                name="vote"
-                defaultValue={vote}
+                name="commit"
+                defaultValue={voting?.commit}
                 forwardRef={register({ required: false })}
+
             />
+
             <Box bg="gray.0" className="card">
                 <div className="card-body">
                     <h4 className="card-title text-center">{`Voting for ${item?.name}`}</h4>
                     <div className="card-img-top" style={{ maxHeight: '200px', overflow: 'hidden' }}>
                         <img src={item?.image} className="card-img-top" alt="..." />
                     </div>
-                    {item?.isFeatured ? (
-                        <h4 className="card-subtitle my-2 text-muted">Delisting coupon from featured list</h4>
-                    ) : (
-                        <h4 className="card-subtitle my-2 text-muted">Listing coupon to featured list</h4>
-                    )}
-
+                    <h4 className="card-subtitle my-2 text-muted">Vote for listing or delisting coupon from featured list</h4>
                     <p className="card-text">
-                        In order to participate in adding or removing a coupon from the list of highlighted coupons, you should vote.
+                        It's time to reveal your vote to the world and list or delist this coupon
+                        {' '}
+                        <span role="img">😎</span>
                     </p>
                     <div className="card-text">
-                        <ul className="list-unstyled">
-                            <li>Voting is done in two steps</li>
-                            <ul>
-                                <li>
-                                    <b>Commit</b>
-                                    {' your vote by using a secret phrase.'}
-                                </li>
-                                <li>
-                                    {'Once the required number of participants is reached, you must '}
-                                    <b>reveal</b>
-                                    {' your vote for it to be effective.'}
-                                </li>
-                            </ul>
-                        </ul>
-                    </div>
-                    <div className="card-text">
-
-                        <Controls.Input
-                            control="select"
-                            title="What do you want ? Feature or Delist this coupon ?"
-                            name="vote"
-                            className="custom-select"
-                            forwardRef={register({ required: true })}
-                            error={errors.vote}
-
-                        >
-                            <option value="featured" selected={!item?.isFeatured}>Add to featured list</option>
-                            <option value="delisted" selected={item?.isFeatured}>Remove from featured list</option>
-                        </Controls.Input>
-                    </div>
-                    <div className="card-text">
-
                         <Controls.Input
                             name="salt"
                             title="Secret phrase"
@@ -93,7 +62,6 @@ const FormVote = ({
                             error={errors.salt}
                         />
                         <div className="alert alert-warning">Do not lose your secret phrase, or you will not be able to reveal you vote at step 2</div>
-
                     </div>
                 </div>
             </Box>
@@ -106,7 +74,7 @@ const FormVote = ({
                 ) : '' }
                 { buttons.includes('submit') ? (
                     <Controls.Button className="text-warning" type="submit">
-                        Commit
+                        Reveal
                     </Controls.Button>
                 ) : '' }
             </Controls.Footer>
@@ -114,4 +82,4 @@ const FormVote = ({
     )
 }
 
-export default FormVote
+export default FormReveal

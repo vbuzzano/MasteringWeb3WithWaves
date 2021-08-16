@@ -5,9 +5,10 @@ function useAppDialogs() {
     const [resultOpened, changeResultState] = useState(false)
     const [resultBuyOpened, changeResultBuyState] = useState(false)
     const [formOpened, changeFormState] = useState(false)
-    const [selectedItem, selectCoupon] = useState()
-    const [editedItem, selectEditedCoupon] = useState()
-    const [manageMode, setManageMode] = useState(false)
+    const [selectedItem, selectItem] = useState()
+    const [editedItem, selectEditedItem] = useState()
+    const [editedOption, selectEditedOption] = useState()
+    const [resultText, setResultText] = useState('')
 
     const [
         onDialogOpen,
@@ -16,26 +17,30 @@ function useAppDialogs() {
         onResultClose,
         onResultBuyOpen,
         onResultBuyClose,
-        onFormOpened,
+        onFormOpen,
         onFormClose,
     ] = useMemo(
         () => [
-            (coupon, isManageMode = false) => {
-                setManageMode(isManageMode)
-                selectCoupon(coupon)
+            (item) => {
+                selectItem(item)
                 changeDialogState(true)
             },
             () => changeDialogState(false),
-            () => changeResultState(true),
+            (text) => {
+                setResultText(text)
+                changeResultState(true)
+            },
             () => changeResultState(false),
             () => changeResultBuyState(true),
             () => changeResultBuyState(false),
-            (coupon = null) => {
-                selectEditedCoupon(coupon)
+            (item = null, option = null) => {
+                selectEditedItem(item)
+                selectEditedOption(option)
                 changeFormState(true)
             },
             () => {
-                selectEditedCoupon(null)
+                selectEditedItem(null)
+                selectEditedOption(null)
                 changeFormState(false)
             },
         ],
@@ -43,13 +48,16 @@ function useAppDialogs() {
     )
 
     return {
-        manageMode,
         selectedItem,
         editedItem,
+        editedOption,
         dialog: [dialogOpened, onDialogOpen, onDialogClose],
-        result: [resultOpened, onResultOpen, onResultClose],
+        result: [resultText, resultOpened, onResultOpen, onResultClose],
         resultBuy: [resultBuyOpened, onResultBuyOpen, onResultBuyClose],
-        form: [formOpened, onFormOpened, onFormClose],
+        form: [formOpened, onFormOpen, onFormClose],
+        selectItem,
+        selectEditedItem,
+        selectEditedOption,
     }
 }
 

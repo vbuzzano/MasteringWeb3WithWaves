@@ -1,25 +1,23 @@
-/* eslint-disable no-alert */
-/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useEffect, useState } from 'react'
 
+import { Flex, Loading } from '../../../shared'
 import { Coupons } from '../../../../containers'
 import {
-    DATA, fetchSupplierItems, subscribe,
+    DATA, fetchUserActiveCoupons, subscribe,
 } from '../../../../libs/dApp'
-import { Flex, Loading } from '../../../shared'
 
-function Manager({ account, setActiveUrl }) {
+const Ac = ({ account, setActiveUrl }) => {
     const [loadingData, setLoadingData] = useState(true)
-    const [items, updateItems] = useState([])
+    const [items, updateItems] = useState(false)
     const { address } = account
 
     useEffect(() => {
         async function refreshData() {
-            let list = []
             setLoadingData(true)
             try {
-                list = await fetchSupplierItems(address)
-                console.debug('[ 🔄 Manager ] :', `${list.length} items loaded`)
+                const list = await fetchUserActiveCoupons(address)
+                console.debug('[ 🔄 Active Coupons ] :', `${list.length} coupons loaded`)
                 updateItems(list)
             } catch (error) {
                 console.error(error)
@@ -27,31 +25,31 @@ function Manager({ account, setActiveUrl }) {
                 setLoadingData(false)
             }
         }
+
         return subscribe(DATA, refreshData)
     }, [address])
-
     return (
         <>
             {loadingData ? (<Loading />) : null }
             <Flex
                 justifyContent="center"
-                px={{
-                    0: '20px',
-                    lg: '39px',
-                    xl: '20px',
+                p={{
+                    0: '10px',
+                    md: '0px',
                 }}
                 flexWrap="wrap"
             >
                 <Coupons
-                    isManager
-                    mode="manage"
-                    setActiveUrl={setActiveUrl}
                     items={items}
+                    setActiveUrl={setActiveUrl}
+                    mode="active"
                     hideEmptyListMessage={loadingData}
+                    enableVoting
                 />
             </Flex>
         </>
+
     )
 }
 
-export default Manager
+export default Ac

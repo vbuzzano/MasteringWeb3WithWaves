@@ -3,7 +3,7 @@ import {
     lineHeight, fontWeight, letterSpacing, compose,
 } from 'styled-system'
 
-import { Box } from '.'
+import Box from './Box'
 
 const enhanceStyledComponent = compose(
     lineHeight,

@@ -42,7 +42,7 @@ const Form = ({
             as="form"
             onSubmit={handleSubmit(onSubmit)}
         >
-            <Box bg="gray.0">
+            <Box bg="gray.0" className="rounded">
                 <Flex p="10px" justifyContent="center">
                     <Controls.SmallLogo />
                 </Flex>
@@ -77,7 +77,7 @@ const Form = ({
                             <Controls.Input
                                 name="priceTerm"
                                 title="Price term"
-                                maxlength="10"
+                                maxLength="10"
                                 forwardRef={register({ required: true })}
                                 error={errors.priceTerm}
                                 defaultValue={editedItem?.priceTerm}
@@ -109,10 +109,10 @@ const Form = ({
                             <Controls.Input
                                 name="name"
                                 title="Name"
-                                maxlength="25"
                                 forwardRef={register({ required: true })}
                                 error={errors.name}
                                 defaultValue={editedItem?.name}
+                                maxLength="25"
                             />
                         </Box>
                         <Box pb="8px">
@@ -120,22 +120,22 @@ const Form = ({
                                 name="shortDescription"
                                 height="150px"
                                 width="100%"
-                                maxlength="50"
                                 control="textarea"
                                 title="Short description"
                                 forwardRef={register({ required: true })}
                                 error={errors.shortDescription}
                                 defaultValue={editedItem?.shortDescription}
+                                maxLength="50"
                             />
                         </Box>
                         <Box pb="8px">
                             <Controls.Input
                                 name="title"
                                 title="Title"
-                                maxlength="10"
                                 forwardRef={register({ required: true })}
                                 error={errors.title}
                                 defaultValue={editedItem?.title}
+                                maxLength="12"
                             />
                         </Box>
                         <Box pb="8px">
@@ -160,7 +160,7 @@ const Form = ({
                             <Controls.Input
                                 name="longTitle"
                                 title="Long title"
-                                maxlength="25"
+                                maxLength="25"
                                 forwardRef={register({ required: false })}
                                 error={errors.longTitle}
                                 defaultValue={editedItem?.longTitle}
@@ -171,7 +171,7 @@ const Form = ({
                                 name="longDescription"
                                 height="150px"
                                 width="100%"
-                                maxlength="500"
+                                maxLength="500"
                                 control="textarea"
                                 title="Long description"
                                 forwardRef={register({ required: false })}
@@ -194,8 +194,10 @@ const Form = ({
             </Box>
 
             <Controls.Footer>
-                <button type="button" onClick={onClose}>Cancel</button>
-                <Controls.Button color="blue.0" type="submit">
+                <Controls.Button className="text-secondary" type="button" onClick={onClose}>
+                Cancel
+                </Controls.Button>
+                <Controls.Button className="text-success" type="submit">
                     Save Coupon
                 </Controls.Button>
             </Controls.Footer>

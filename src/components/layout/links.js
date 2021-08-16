@@ -1,8 +1,15 @@
+import { AddCouponIcon } from './header-controls'
+
 export const headerLinks = [
+    {
+        url: '#featured',
+        title: 'Featured',
+        isEnabled: () => true,
+    },
     {
         url: '#market',
         title: 'Market',
-        isEnabled: () => true,
+        isEnabled: () => false,
     },
     {
         url: '#my',
@@ -22,95 +29,120 @@ export const companyLinks = [
     {
         url: '#company1',
         title: 'About',
+        isEnabled: () => true,
     },
     {
         url: '#company2',
         title: 'Blog',
+        isEnabled: () => true,
     },
     {
         url: '#company3',
         title: 'Press',
+        isEnabled: () => true,
     },
     {
         url: '#company4',
         title: 'Investor Relations',
+        isEnabled: () => true,
     },
     {
         url: '#company5',
         title: 'Management Team',
+        isEnabled: () => true,
     },
     {
         url: '#company6',
         title: 'In Your Community',
-    },
-]
-
-export const workLinks = [
-    {
-        url: '#supplier',
-        title: 'Register as Supplier',
-        isEnabled: e => e.isSupplier,
-    },
-    {
-        url: '#my/coupons',
-        title: 'Use your coupons',
-        isEnabled: () => false,
-    },
-    {
-        url: '#work3',
-        title: 'Learn About Groupon Merchant',
-        isEnabled: () => false,
-    },
-    {
-        url: '#work4',
-        title: 'Affiliate Program',
-        isEnabled: () => false,
-    },
-    {
-        url: '#work5',
-        title: 'Vendor Code of Conduct',
-        isEnabled: () => false,
-    },
-]
-
-export const moreLinks = [
-    {
-        url: '#more1',
-        title: 'Customer Support',
-        isEnabled: () => false,
-    },
-    {
-        url: '#more2',
-        title: 'Refund Policies',
-        isEnabled: () => false,
-    },
-    {
-        url: '#more3',
-        title: 'FAQ',
-        isEnabled: () => false,
-    },
-    {
-        url: '#more4',
-        title: 'Miles & Points',
-        isEnabled: () => false,
-    },
-]
-
-export const mainLinks = [
-    ...headerLinks,
-    {
-        url: '#main1',
-        title: 'Goods',
-        isEnabled: () => false,
-    },
-    {
-        url: '#my/coupons',
-        title: 'Coupons',
-        isEnabled: () => false,
+        isEnabled: () => true,
     },
     {
         url: '#main3',
         title: 'Contacts',
-        isEnabled: () => false,
+        isEnabled: () => true,
+    },
+]
+
+export const supplierLinks = [
+    {
+        url: '#supplier',
+        title: 'Register as Supplier',
+        isEnabled: e => !e.isSupplier,
+    },
+    {
+        url: '#supplier/manage',
+        title: 'Manage Coupons',
+        isEnabled: e => e.isSupplier,
+    },
+    {
+        url: '#supplier/withdraw',
+        title: 'Withdraw Funds',
+        isEnabled: e => e.isSupplier,
+    },
+    {
+        url: '#supplier/history',
+        title: 'Sales History',
+        isEnabled: e => e.isSupplier,
+    },
+]
+
+export const myLinks = [
+    {
+        url: '#my/coupons',
+        title: 'Use your coupons',
+        isEnabled: () => true,
+    },
+    {
+        url: '#my/used',
+        title: 'See your used coupons',
+        isEnabled: () => true,
+    },
+    {
+        url: '#my/expired',
+        title: 'See your expired Coupons',
+        isEnabled: () => true,
+    },
+    {
+        url: '#my/purchases',
+        title: 'Purchases History',
+        isEnabled: () => true,
+    },
+    {
+        url: '#refund',
+        title: 'Refund Policies',
+        isEnabled: () => true,
+    },
+    {
+        url: '#faq',
+        title: 'FAQ',
+        isEnabled: () => true,
+    },
+]
+
+export const mainLinks = [
+    {
+        url: '#featured',
+        title: 'Featured  Coupons',
+        isEnabled: () => true,
+    },
+    {
+        url: '#delisted',
+        title: 'Delisted  Coupons',
+        isEnabled: () => true,
+    },
+    {
+        url: '#expired',
+        title: 'Expired Coupons',
+        isEnabled: () => true,
+    },
+    {
+        url: '#miles',
+        title: 'Miles & Points',
+        isEnabled: () => true,
+    },
+    {
+        url: '#support',
+        title: 'Customer Support',
+        isEnabled: () => true,
     },
 ]

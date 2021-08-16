@@ -2,42 +2,31 @@
 /* eslint-disable react/no-unescaped-entities */
 import React, { useEffect, useState } from 'react'
 
-import { Flex, Modal } from '../../shared'
+import { Flex, Loading } from '../../shared'
 import { Coupons } from '../../../containers'
-import { Dialog, FormVote, Result } from '../../modal'
-import { useAppDialogs } from '../../service'
 import {
-    subscribe, DATA, commitVote, fetchItems, purchaseCoupon,
+    subscribe, DATA, fetchItems,
 } from '../../../libs/dApp'
 
-const PageMarket = ({ setActiveUrl }) => {
-    const [loading, setLoading] = useState(false)
+const PageMarket = ({ activeUrl, setActiveUrl, filter = e => !e.isExpired }) => {
+    const [loadingData, setLoadingData] = useState(true)
     const [items, updateItems] = useState([])
-    const {
-        selectedItem,
-        dialog: [dialogOpened, onDialogOpen, onDialogClose],
-        result: [resultOpened, onResultOpen, onResultClose],
-    } = useAppDialogs()
-
-    const {
-        form: [voteFormOpened, onVoteFormOpened, onVoteFormClose],
-        result: [voteResultOpened, onVoteResultOpen, onVoteResultClose],
-    } = useAppDialogs()
 
     useEffect(() => {
         async function refreshData() {
+            setLoadingData(true)
             try {
-                const list = await fetchItems()
+                const list = (await fetchItems()).filter(filter)
                 console.debug('[ 🔄 Market ] :', `${list.length} items loaded`)
                 updateItems(list)
             } catch (error) {
                 console.error(error)
             } finally {
-                setLoading(false)
+                setLoadingData(false)
             }
         }
         return subscribe(DATA, refreshData)
-    }, [])
+    }, [activeUrl])
 
     return (
         <>
@@ -53,6 +42,7 @@ const PageMarket = ({ setActiveUrl }) => {
                     <b>click on the coupon of your choice, then on "Buy" to buy it</b>
                 </small>
             </div>
+            {loadingData ? (<Loading />) : null }
             <Flex
                 justifyContent="center"
                 px={{
@@ -63,81 +53,13 @@ const PageMarket = ({ setActiveUrl }) => {
                 flexWrap="wrap"
             >
                 <Coupons
-                    loading={loading}
+                    items={items}
                     setActiveUrl={setActiveUrl}
-                    onDialogOpen={onDialogOpen}
-                    coupons={items}
+                    mode="market"
+                    hideEmptyListMessage
+                    enableVoting
                 />
             </Flex>
-
-            <Modal open={dialogOpened} onClose={onDialogClose}>
-                <Dialog
-                    buttons={['buy', 'vote']}
-                    // activeUrl={activeUrl}
-                    // manageMode={manageMode}
-                    coupon={selectedItem}
-                    onClose={onDialogClose}
-                    onBuy={async () => {
-                        try {
-                            onDialogClose()
-                            await purchaseCoupon(selectedItem)
-                            onResultOpen()
-                        } catch (error) {
-                            alert(error.message)
-                            console.log(error)
-                        }
-                    }}
-                    onVote={async () => {
-                        try {
-                            onDialogClose()
-                            onVoteFormOpened()
-                        } catch (error) {
-                            alert(error.message)
-                            console.log(error)
-                        }
-                    }}
-                />
-
-            </Modal>
-            <Modal open={resultOpened} onClose={onResultClose}>
-                <Result
-                    text="<div class='alert alert-success'>Thank you for your purchase.</div><div>The supplier will soon validate this transaction and you will receive your coupon as NFT</div>"
-                    onClose={onResultClose}
-                />
-            </Modal>
-
-            <Modal
-                open={voteFormOpened}
-                onClose={onVoteFormClose}
-                width={{
-                    0: '100%',
-                    lg: 'initial',
-                }}
-                mx="10px"
-            >
-                <FormVote
-                    coupon={selectedItem}
-                    onClose={onVoteFormClose}
-                    onSubmit={async (data) => {
-                        setLoading(true)
-                        try {
-                            onVoteFormClose()
-                            await commitVote(selectedItem.id, 'featured', data.salt)
-                            onVoteResultOpen()
-                        } catch (error) {
-                            console.log(error)
-                        } finally {
-                            setLoading(false)
-                        }
-                    }}
-                />
-            </Modal>
-            <Modal open={voteResultOpened} onClose={onVoteResultClose}>
-                <Result
-                    text="<div class='alert alert-success'>Thank you for voting.</div>"
-                    onClose={onVoteResultClose}
-                />
-            </Modal>
         </>
 
     )

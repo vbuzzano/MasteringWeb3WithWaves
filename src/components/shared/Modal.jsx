@@ -11,10 +11,10 @@ const { timeout } = overlayAnimation
 
 const modalContainer = document.getElementById('modal')
 
-const Container = styled(Box)`
+const styleContainer = (zIndex = 15) => styled(Box)`
     margin: 0 auto;
     top: 0;
-    z-index: 15;
+    z-index: ${zIndex};
     position: fixed;
     left: 50%;
     transform: translate(-50%, 0);
@@ -41,18 +41,21 @@ const Container = styled(Box)`
 `
 
 const Modal = ({
-    children, open, onClose, ...rest
-}) =>
-    ReactDOM.createPortal(
+    children, open, onClose, zIndex, ...rest
+}) => {
+    zIndex ??= 15
+    const Container = styleContainer(zIndex)
+    const Ovl = Overlay(zIndex - 1)
+    return ReactDOM.createPortal(
         <>
             <CSSTransition in={open} timeout={timeout} classNames="modal" unmountOnExit>
                 <Container {...rest}>{children}</Container>
             </CSSTransition>
             <CSSTransition in={open} {...overlayAnimation} unmountOnExit>
-                <Overlay top="0px" onClick={onClose} />
+                <Ovl top="0px" onClick={onClose} />
             </CSSTransition>
         </>,
         modalContainer,
     )
-
+}
 export default Modal

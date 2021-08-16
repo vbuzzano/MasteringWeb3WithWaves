@@ -10,7 +10,7 @@ import * as Controls from '../components/layout/header-controls'
 import * as Layout from '../components/layout'
 import theme from '../styled-components/theme'
 import * as LINKS from '../components/layout/links'
-import { useDispatchedActions } from '../components/service'
+import { useCouponDialogs, useDispatchedActions } from '../components/service'
 import * as rootActions from '../reducers/root'
 
 const { breakpoints } = theme
@@ -50,8 +50,21 @@ const Header = ({
     const { changeMobileMenuState } = useDispatchedActions(rootActions)
     const onCloseMenu = useCallback(() => changeMobileMenuState(false))
 
+    const Overlay = Layout.Overlay()
+
+    const {
+        CouponDialogs,
+        // eslint-disable-next-line no-unused-vars
+        form: [formOpened, onFormOpen],
+    } = useCouponDialogs()
+
+    const onCreateCoupon = async () => {
+        onFormOpen()
+    }
+
     return (
         <div>
+            <CouponDialogs />
             <Controls.HeaderLayout height={menuHeight} position="fixed">
                 <Flex
                     alignItems={{
@@ -86,6 +99,7 @@ const Header = ({
                             tabletResolution={breakpoints.lg}
                             mobileResolution={breakpoints.sm}
                             menuOpened={isOpen}
+                            onCreateCoupon={onCreateCoupon}
                         />
                     </Flex>
                     <MediaQuery maxWidth={breakpoints.sm}>
@@ -101,10 +115,19 @@ const Header = ({
             <Box width="100%" height={menuHeight} />
             <MediaQuery maxWidth={breakpoints.lg}>
                 <CSSTransition unmountOnExit {...Layout.menuAnimation} in={isOpen}>
-                    <Layout.MobileMenu top="0px" onClose={onCloseMenu} position="fixed" />
+                    <Layout.MobileMenu
+                        account={account}
+                        setActiveUrl={(url) => {
+                            setActiveUrl(url)
+                            onCloseMenu()
+                        }}
+                        top="0px"
+                        onClose={onCloseMenu}
+                        position="fixed"
+                    />
                 </CSSTransition>
                 <CSSTransition unmountOnExit {...Layout.overlayAnimation} in={isOpen}>
-                    <Layout.Overlay onClick={onCloseMenu} top="0px" />
+                    <Overlay onClick={onCloseMenu} top="0px" />
                 </CSSTransition>
             </MediaQuery>
         </div>

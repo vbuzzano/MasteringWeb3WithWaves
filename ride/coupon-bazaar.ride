@@ -11,6 +11,7 @@ let DELISTED = "delisted"
 
 let VOTING = "voting"
 let REVEAL = "reveal"
+let ENDED = "ended"
 
 let APPROVAL = "approval"
 let REJECTED = "rejected"
@@ -51,15 +52,12 @@ func getKeyItemData(item: String) = item + "_data"
 func getKeyItemExpireDate(item: String) = item + "_expiredate"
 func getKeyItemSoldCounter(item: String) = item + "_sold"
 func getKeyItemRemoved(item: String) = item + "_removed"
+func getKeyItemFeatured(item: String) = item + "_featured"
+func getKeyItemVoteRound(item: String) = item + "_voteround"
 
-func getKeyCommit(item: String, user: String) = item + "_" + user + "_commit"
-func getKeyCommitsCount(item: String) = item + "_cmtcnt"
-func getKeyReveal(item: String, user: String) = item + "_" + user + "_reveal"
-func getKeyItemStatus(item: String) = item + "_status"
-func getKeyVotesCount(item: String, vote: String) = item + "_res:" + vote
-
-func getKeySupplierBalance(supplier: String) = supplier + "_balance"
+func getKeyUserPurchasedItem(user: String, item: String) = user + "_" + item + "_purchased"
 func getKeyUserItemCounter(user: String, item: String) = user + "_" + item + "_counter"
+func getKeySupplierBalance(supplier: String) = supplier + "_balance"
 
 func genPurchaseKey(supplier: String, item: String, user: String, counter: Int) = 
     "purchase_" + toBase58String(sha256(toBytes(supplier + "_" + item + "_" + user + "_" + toString(counter))))
@@ -70,71 +68,52 @@ func getKeyPurchaseUser(purchase: String) = purchase + "_user"
 func getKeyPurchaseAmount(purchase: String) = purchase + "_amount"
 func getKeyPurchaseTimestamp(purchase: String) = purchase + "_timestamp"
 func getKeyPurchaseAssetId(purchase: String) = purchase + "_assetId"
-func getKeyPurchaseFundPaid(purchase: String) ="purchase_" + purchase + "_fundpaid"
+func getKeyPurchaseFundPaid(purchase: String) = purchase + "_fundpaid"
 
 func getKeyCouponPurchase(assetId: String) ="coupon_" + assetId + "_purchase"
 func getKeyCouponItem(assetId: String) ="coupon_" + assetId + "_item"
 
-# func getKeyCoupon(assetId: String) = "coupon_" + assetId
-# func getKeyCouponItem(coupon: String) = coupon + "_item"
 
-func getValueSupplierBalance(supplier: String) =
-    getIntegerByKey(getKeySupplierBalance(supplier))
+func getKeyVote(item: String, round: Int) = "vote" + item + "[" + round.toString() + "]"
+func getKeyVoteCommitsCount(keyVote: String) = keyVote + "_cmtcnt"
+func getKeyVoteStatus(keyVote: String) = keyVote + "_status"
+func getKeyVotesCount(keyVote: String, vote: String) = keyVote + "_res:" + vote
 
-func getValueUserItemCounter(user: String, item: String) =
-    getIntegerByKey(getKeyUserItemCounter(user, item))
+func getKeyUserVoteCommit(keyVote: String, user: String) = keyVote + "_" + user + "_commit"
+func getKeyUserVoteReveal(keyVote: String, user: String) = keyVote + "_" + user + "_reveal"
 
-func getValuePurchaseStatus(purchase: String) =
-    getStringByKey(getKeyPurchaseStatus(purchase))
+func getValueSupplierBalance(supplier: String) = getIntegerByKey(getKeySupplierBalance(supplier))
 
-func getValuePurchaseItem(purchase: String) =
-    getStringValue(this, getKeyPurchaseItem(purchase))
+func getValueUserItemCounter(user: String, item: String) = getIntegerByKey(getKeyUserItemCounter(user, item))
+func getValueUserPurchasedItem(user: String, item: String) = getBooleanByKey(getKeyUserPurchasedItem(user, item))
 
-func getValuePurchaseSupplier(purchase: String) =
-    getStringValue(this, getKeyPurchaseSupplier(purchase))
 
-func getValuePurchaseUser(purchase: String) =
-    getStringValue(this, getKeyPurchaseUser(purchase))
+func getValueItemPrice(item: String) = getIntegerValue(this, getKeyItemPrice(item))
+func getValueItemSupplier(item: String) = getStringByKey(getKeyItemSupplier(item))
+func getValueItemExpireTime(item: String) = getIntegerByKey(getKeyItemExpireDate(item))
+func getValueItemTitle(item: String) = getStringByKey(getKeyItemTitle(item))
+func getValueItemSoldCounter(item: String) = getIntegerByKey(getKeyItemSoldCounter(item))
+func getValueItemRemoved(item: String) = getBooleanByKey(getKeyItemRemoved(item))
+func getValueItemFeatured(item: String) = getBooleanByKey(getKeyItemFeatured(item))
 
-func getValuePurchaseAmount(purchase: String) =
-    getIntegerValue(this, getKeyPurchaseAmount(purchase))
+func getValuePurchaseStatus(purchase: String) = getStringByKey(getKeyPurchaseStatus(purchase))
+func getValuePurchaseItem(purchase: String) = getStringValue(this, getKeyPurchaseItem(purchase))
+func getValuePurchaseSupplier(purchase: String) = getStringValue(this, getKeyPurchaseSupplier(purchase))
+func getValuePurchaseUser(purchase: String) = getStringValue(this, getKeyPurchaseUser(purchase))
+func getValuePurchaseAmount(purchase: String) = getIntegerValue(this, getKeyPurchaseAmount(purchase))
+func getValuePurchaseTimestamp(purchase: String) = getIntegerByKey(getKeyPurchaseTimestamp(purchase))
+func getValuePurchaseAssetId(purchase: String) = getStringByKey(getKeyPurchaseAssetId(purchase))
+func getValuePurchaseFundPaid(purchase: String) = getBooleanByKey(getKeyPurchaseFundPaid(purchase))
 
-func getValuePurchaseTimestamp(purchase: String) =
-    getIntegerByKey(getKeyPurchaseTimestamp(purchase))
+func getValueCouponPurchase(assetId: String) = getStringByKey(getKeyCouponPurchase(assetId))
 
-func getValuePurchaseAssetId(purchase: String) =
-    getStringByKey(getKeyPurchaseAssetId(purchase))
+func getValueVoteRound(item: String) = getIntegerByKey(getKeyItemVoteRound(item))
+func getValueVoteStatus(keyVote: String) = getStringByKey(getKeyVoteStatus(keyVote))
+func getValueVotesCount(keyVote: String, vote: String) = getIntegerByKey(getKeyVotesCount(keyVote, vote))
+func getValueVoteCommitsCount(keyVote:String) = getIntegerByKey(getKeyVoteCommitsCount(keyVote))
 
-func getValuePurchaseFundPaid(purchase: String) =
-    getBooleanByKey(getKeyPurchaseFundPaid(purchase))
-
-func getValueItemPrice(item: String) =
-    getIntegerValue(this, getKeyItemPrice(item))
-
-func getValueItemSupplier(item: String) =
-    getStringByKey(getKeyItemSupplier(item))
-
-func getValueItemExpireTime(item: String) =
-    getIntegerByKey(getKeyItemExpireDate(item))
-
-func getValueItemTitle(item: String) =
-    getStringByKey(getKeyItemTitle(item))
-
-func getValueItemSoldCounter(item: String) =
-    getIntegerByKey(getKeyItemSoldCounter(item))
-
-func getValueItemRemoved(item: String) = 
-    getBooleanByKey(getKeyItemRemoved(item))
-
-func getValueCouponPurchase(assetId: String) =
-    getStringByKey(getKeyCouponPurchase(assetId))
-
-func getValueCommit(item: String, user: String) = getStringByKey(getKeyCommit(item, user))
-func getValueCommitsCount(item: String) = getIntegerByKey(getKeyCommitsCount(item))
-func getValueReveal(item: String, user: String) = getStringByKey(getKeyReveal(item, user))
-func getValueItemStatus(item: String) = getStringByKey(getKeyItemStatus(item))
-func getValueVotesCount(item: String, vote: String) = getIntegerByKey(getKeyVotesCount(item, vote))
-
+func getValueUserVoteCommit(keyVote: String, user: String) = getStringByKey(getKeyUserVoteCommit(keyVote, user))
+func getValueUserVoteReveal(keyVote: String, user: String) = getStringByKey(getKeyUserVoteReveal(keyVote, user))
 
 
 # 0. Validate price and existance of the item
@@ -166,7 +145,8 @@ func addItem(title: String, price: Int, data: String, expire: Int) = {
             StringEntry(getKeyItemTitle(item), title),
             IntegerEntry(getKeyItemPrice(item), price),
             StringEntry(getKeyItemData(item), data),
-            IntegerEntry(getKeyItemExpireDate(item), expire)
+            IntegerEntry(getKeyItemExpireDate(item), expire),
+            BooleanEntry(getKeyItemFeatured(item), true)
         ]
     }
 }
@@ -206,7 +186,8 @@ func removeItem(item: String) = {
             DeleteEntry(getKeyItemTitle(item)),
             DeleteEntry(getKeyItemPrice(item)),
             DeleteEntry(getKeyItemData(item)),
-            DeleteEntry(getKeyItemExpireDate(item))
+            DeleteEntry(getKeyItemExpireDate(item)),
+            DeleteEntry(getKeyItemFeatured(item))
         ] else [
             BooleanEntry(getKeyItemRemoved(item), true)
         ]
@@ -324,6 +305,7 @@ func rejectPurchase(purchase: String) = {
             , StringEntry(keyPurchaseAssetId, assetId)
             , IntegerEntry(keySupplierBalance, newBalance)
             , IntegerEntry(keyItemSoldCounter, itemSoldCounter)
+            , BooleanEntry(getKeyUserPurchasedItem(user, item), true)
             # , ScriptTransfer(address, 1, fromBase58String(assetId))
         ]
     }
@@ -344,18 +326,19 @@ func rejectPurchase(purchase: String) = {
         let assetId = toBase58String(asset)
         let purchase = getValueCouponPurchase(assetId)
         let supplier = getValuePurchaseSupplier(purchase)
-        let isfundPaid = getValuePurchaseFundPaid(assetId)
+        let isfundPaid = getValuePurchaseFundPaid(purchase)
         if (caller != supplier) then throw("Your are not the supplier for this coupon")
-        else if (isfundPaid) then throw("Fund has already been paid")
-        else {
+        else if (isfundPaid) then {
+            [ Burn(asset, 1) ]
+        } else {
             let balance = getValueSupplierBalance(supplier)
             let amount = getValuePurchaseAmount(purchase)
-            let withdrawAmt = if (balance - amount ) <= 0 then balance else  amount
+            let withdrawAmt = if (balance - amount ) <= 0 then balance else amount
             let newBalance = balance - withdrawAmt
-            if (newBalance <= 0) then throw("Not enough funds to withdraw")
+            if (newBalance < 0) then throw("Not enough funds to withdraw")
             else {
                 let keySupplierBalance = getKeySupplierBalance(supplier)
-                let keyCouponFundPaid = getKeyPurchaseFundPaid(assetId)
+                let keyCouponFundPaid = getKeyPurchaseFundPaid(purchase)
                 [
                       Burn(asset, 1)
                     , BooleanEntry(keyCouponFundPaid, true)
@@ -375,7 +358,7 @@ func rejectPurchase(purchase: String) = {
     else {
         let purchase = getValueCouponPurchase(assetId)
         let supplier = getValuePurchaseSupplier(purchase)
-        let isfundPaid = getValuePurchaseFundPaid(assetId)
+        let isfundPaid = getValuePurchaseFundPaid(purchase)
         if (caller != supplier) then throw("Your are not the supplier for this coupon")
         else if (isfundPaid) then throw("Fund has already been paid")
         else {
@@ -395,10 +378,10 @@ func rejectPurchase(purchase: String) = {
                 let amount = getValuePurchaseAmount(purchase)
                 let withdrawAmt = if (balance - amount ) <= 0 then balance else  amount
                 let newBalance = balance - withdrawAmt
-                if (newBalance <= 0) then throw("Not enough funds to withdraw")
+                if (newBalance < 0) then throw("Not enough funds to withdraw")
                 else {
                     let keySupplierBalance = getKeySupplierBalance(supplier)
-                    let keyCouponFundPaid = getKeyPurchaseFundPaid(assetId)
+                    let keyCouponFundPaid = getKeyPurchaseFundPaid(purchase)
                     [
                           BooleanEntry(keyCouponFundPaid, true)
                         , IntegerEntry(keySupplierBalance, newBalance)
@@ -414,19 +397,21 @@ func rejectPurchase(purchase: String) = {
 @Callable(i)
 func voteCommit(item: String, hash: String) = {
     let user = i.caller.bytes.toBase58String()
-    let commitsCount = getValueCommitsCount(item)
-    let status = getValueItemStatus(item)
-    if (commitsCount >= VOTERS) then throw("Reached max number of voters")
-    else if (getValueCommit(item, user) != NONE) then throw("You voted already")
-    else if (getKeyItemSupplier(item) == NONE) then throw("Item does not exists")
+    let round = getValueVoteRound(item)
+    let keyVote = getKeyVote(item, round)
+    let status = getValueVoteStatus(keyVote)
+    let commitsCount = getValueVoteCommitsCount(keyVote)
+    if (getKeyItemSupplier(item) == NONE) then throw("Item does not exists")
     else if (status != NONE && status != VOTING) then throw("Voting is not active for this item now")
+    else if (getValueUserVoteCommit(keyVote, user) != NONE) then throw("You voted already")
+    else if (commitsCount >= VOTERS) then throw("Reached max number of voters")
     else {
-        let newStatus = if (commitsCount == VOTERS) then REVEAL else VOTING
-        
+        let newCommitsCount = commitsCount + 1
+        let newStatus = if (newCommitsCount == VOTERS) then REVEAL else VOTING
         [
-            StringEntry(getKeyCommit(item, user), hash),
-            IntegerEntry(getKeyCommitsCount(item), commitsCount + 1),
-            StringEntry(getKeyItemStatus(item), newStatus)
+            StringEntry(getKeyUserVoteCommit(keyVote, user), hash),
+            IntegerEntry(getKeyVoteCommitsCount(keyVote), newCommitsCount),
+            StringEntry(getKeyVoteStatus(keyVote), newStatus)
         ]
     }
 }
@@ -434,21 +419,33 @@ func voteCommit(item: String, hash: String) = {
 @Callable(i)
 func voteReveal(item: String, vote: String, salt: String) = {
     let user = i.caller.bytes.toBase58String()
-    let status = getValueItemStatus(item)
-    let newVotesCount = getValueVotesCount(item, vote) + 1
+    let round = getValueVoteRound(item)
+    let keyVote = getKeyVote(item, round)
+    let status = getValueVoteStatus(keyVote)
+    let newVotesCount = getValueVotesCount(keyVote, vote) + 1
     let saltedVote = (item + vote + salt).toBytes().sha256().toBase58String()
-    if (saltedVote != getValueCommit(item, user)) then throw("Reveal data is not valid")
-    else if (getValueCommitsCount(item) < VOTERS) then throw("Max number of voters not reached")
-    else if (getValueReveal(item, user) != NONE) then throw("You voted already")
+    if (saltedVote != getValueUserVoteCommit(keyVote, user)) then throw("Reveal data is not valid")
+    else if (getValueVoteCommitsCount(keyVote) < VOTERS) then throw("Max number of voters not reached")
+    else if (getValueUserVoteReveal(keyVote, user) != NONE) then throw("You voted already")
     else if (status != VOTING && status != REVEAL) then throw("Voting is not active for this item now")
     else if (vote != FEATURED && vote != DELISTED) then throw("Provided voting option is incorrect")
     else {
-        let newStatus = if (newVotesCount >= QUORUM) then vote else REVEAL
-        [
-            StringEntry(getKeyReveal(item, user), vote),
-            IntegerEntry(getKeyVotesCount(item, user), newVotesCount),
-            StringEntry(getKeyItemStatus(item), newStatus)
-        ]
+        if (newVotesCount >= QUORUM) then {
+            let featured = if (vote == FEATURED) then true else false
+            [
+                StringEntry(getKeyUserVoteReveal(keyVote, user), vote),
+                IntegerEntry(getKeyVotesCount(keyVote, vote), newVotesCount),
+                IntegerEntry(getKeyItemVoteRound(item), round + 1),
+                StringEntry(getKeyVoteStatus(keyVote), vote),
+                BooleanEntry(getKeyItemFeatured(item), featured)
+            ]
+        } else {
+            [
+                StringEntry(getKeyUserVoteReveal(keyVote, user), vote),
+                IntegerEntry(getKeyVotesCount(keyVote, vote), newVotesCount),
+                StringEntry(getKeyVoteStatus(keyVote), REVEAL)
+            ]
+        }
     }
 }
 
@@ -458,6 +455,7 @@ func verify() = {
         case t:SetScriptTransaction => sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
         case t:IssueTransaction => sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
         case t:TransferTransaction => sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
+        case t:DataTransaction => false #sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
         case _ => false
     }
 }
