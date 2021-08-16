@@ -71,6 +71,7 @@ const setSession = (session) => {
         localStorage.setItem(`session_${session.address}`, JSON.stringify(session))
     }
 }
+
 const delSession = (address) => {
     if (localStorage) localStorage.removeItem(`session_${address}`)
 }
@@ -208,10 +209,16 @@ if (WavesKeeper) {
     })
 }
 
+const connectIfNot = (address) => {
+    setSession({ address })
+    updateState()
+}
+
 export {
     currentAccount,
     currentNetwork,
     connect,
+    connectIfNot,
     disconnect,
     subscribe,
     fetchData,

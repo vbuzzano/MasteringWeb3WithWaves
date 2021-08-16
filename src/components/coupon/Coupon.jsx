@@ -4,8 +4,10 @@ import memoizeOne from 'memoize-one'
 
 import { Rating, Price, Discount } from './coupon-controls'
 
-import { Box, Flex, Text } from '../shared'
-import { formatNumber } from '../../libs/dApp'
+import {
+    Badge, Box, Flex, Text,
+} from '../shared'
+import { formatDate, formatNumber } from '../../libs/dApp'
 
 const isEmpty = memoizeOne(val => val === undefined || val === 0)
 
@@ -38,7 +40,11 @@ const Coupon = ({
             {!isEmpty(expirationDate) && (
                 <Box position="absolute" bottom="0px" left="0px">
                     <Text>
-                        {isExpired ? (<span className="badge badge-warning ml-1">expired</span>) : (<span className="badge badge-light">{`expire ${expirationDate}`}</span>) }
+                        {isExpired ? (
+                            <Badge type="danger" p={1} m={1} text="expired" />
+                        ) : (
+                            <Badge type="light" p={1} m={1} text={`expire ${formatDate(new Date(expirationDate))}`} />
+                        )}
                     </Text>
                 </Box>
             )}

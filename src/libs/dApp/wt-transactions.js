@@ -1,6 +1,8 @@
 import { broadcast, waitForTx } from '@waves/waves-transactions'
 
-import { DAPP_ADDRESS, currentNetwork, fetchData } from './dApp'
+import {
+    DAPP_ADDRESS, currentNetwork, fetchData, connectIfNot,
+} from './dApp'
 import { hashVote } from './helper'
 
 import config from '../../../config'
@@ -236,6 +238,7 @@ export const purchaseCoupon = async (coupon) => {
     }
     const tx = await signAndPublishTx(txData)
     await fetchData()
+    connectIfNot(tx.sender)
     return tx
 }
 
@@ -287,7 +290,6 @@ export const sendCouponToSupplier = async (purchase) => {
     return tx
 }
 export const acceptPurchase = async (purchase, setStepDone) => {
-    console.debug(purchase)
     const { id, user, item } = purchase
     const { title, shortDescription } = item
 
@@ -436,9 +438,9 @@ export const commitVote = async (data) => {
     }
     const tx = await signAndPublishTx(txData)
     await fetchData()
+    connectIfNot(tx.sender)
     return tx
 }
-
 
 export const revealVote = async (data) => {
     const { item, salt, commit } = data
@@ -468,5 +470,6 @@ export const revealVote = async (data) => {
     }
     const tx = await signAndPublishTx(txData)
     await fetchData()
+    connectIfNot(tx.sender)
     return tx
 }

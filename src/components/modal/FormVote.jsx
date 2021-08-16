@@ -78,7 +78,7 @@ const FormVote = ({
                             className="custom-select"
                             forwardRef={register({ required: true })}
                             error={errors.vote}
-                            defaultValue={item.isFeatured ? 'delisted' : 'featured'}
+                            defaultValue={item?.isFeatured ? 'delisted' : 'featured'}
 
                         >
                             <option value="featured">Add to featured list</option>

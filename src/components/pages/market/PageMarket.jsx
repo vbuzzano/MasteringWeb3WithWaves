@@ -30,7 +30,7 @@ const PageMarket = ({ activeUrl, setActiveUrl, filter = e => !e.isExpired }) => 
 
     return (
         <>
-            <div className="alert alert-light alert-dismissible fade show text-center" role="alert">
+            <div className="alert alert-light alert-dismissible fade show text-center small" role="alert">
                 <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>

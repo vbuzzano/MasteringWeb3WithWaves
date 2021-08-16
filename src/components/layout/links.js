@@ -1,5 +1,3 @@
-import { AddCouponIcon } from './header-controls'
-
 export const headerLinks = [
     {
         url: '#featured',
@@ -90,6 +88,11 @@ export const myLinks = [
     {
         url: '#my/coupons',
         title: 'Use your coupons',
+        isEnabled: () => true,
+    },
+    {
+        url: '#my/voting',
+        title: 'Vote for your preferred coupon',
         isEnabled: () => true,
     },
     {

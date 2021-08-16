@@ -2,7 +2,7 @@
 import React from 'react'
 
 import {
-    ActiveCoupons, ExpiredCoupons, Menu, PurchasesHistory,
+    ActiveCoupons, ExpiredCoupons, Menu, PurchasesHistory, VotingCoupons,
 } from './components'
 import UsedCoupons from './components/UsedCoupons'
 
@@ -19,7 +19,7 @@ const PageCoupons = ({
                     {activeUrl.match(new RegExp('.*/?(#my[^/]*|#my/coupons.*)$'))
                         ? (
                             <>
-                            <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                            <Box className="alert alert-light alert-dismissible fade show text-center small" role="alert">
                                 <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -40,10 +40,9 @@ const PageCoupons = ({
                         ) : ''
                     }
 
-                    {activeUrl.match(new RegExp('.*/?#my/used.*$'))
-                        ? (
-                            <>
-                            <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                    {activeUrl.match(new RegExp('.*/?#my/used.*$')) ? (
+                        <>
+                            <Box className="alert alert-light alert-dismissible fade show text-center small" role="alert">
                                 <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -51,14 +50,12 @@ const PageCoupons = ({
                                 <br />
                             </Box>
                             <UsedCoupons account={account} setActiveUrl={setActiveUrl} />
-                            </>
-                        ) : ''
-                    }
+                        </>
+                    ) : ''}
 
-                    {activeUrl.match(new RegExp('.*/?#my/expired.*$'))
-                        ? (
-                            <>
-                            <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                    {activeUrl.match(new RegExp('.*/?#my/expired.*$')) ? (
+                        <>
+                            <Box className="alert alert-light alert-dismissible fade show text-center small" role="alert">
                                 <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -66,14 +63,26 @@ const PageCoupons = ({
                                 <br />
                             </Box>
                             <ExpiredCoupons account={account} setActiveUrl={setActiveUrl} />
-                            </>
-                        ) : ''
-                    }
+                        </>
+                    ) : ''}
+
+                    {activeUrl.match(new RegExp('.*/?#my/voting.*$')) ? (
+                        <>
+                            <Box className="alert alert-light alert-dismissible fade show text-center small" role="alert">
+                                <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                    Votes to add or remove coupon from Featured list
+                                <br />
+                            </Box>
+                            <VotingCoupons account={account} setActiveUrl={setActiveUrl} />
+                        </>
+                    ) : ''}
 
                     {activeUrl.match(new RegExp('.*/?#my/purchases.*$'))
                         ? (
                             <>
-                            <Box className="alert alert-light alert-dismissible fade show text-center" role="alert">
+                            <Box className="alert alert-light alert-dismissible fade show text-center small" role="alert">
                                 <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>

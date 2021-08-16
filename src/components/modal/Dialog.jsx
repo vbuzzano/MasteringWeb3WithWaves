@@ -5,7 +5,9 @@ import * as Controls from './controls'
 
 import { Box, Flex, Text } from '../shared'
 import Coupon from '../coupon'
-import { colorStatus, connect, shortAddress } from '../../libs/dApp'
+import {
+    colorStatus, connect, formatDate, shortAddress,
+} from '../../libs/dApp'
 import Badge from '../shared/Badge'
 import BTVoting from '../custom/btVoting'
 
@@ -37,17 +39,20 @@ const Dialog = ({
                     {coupon.assetId ? (
                         <>
                         <Text lineHeight="18px" pt="10px" fontSize="12px">
-                            {'nft: '}
+                            {`purchased on ${formatDate(new Date(coupon.timestamp))}`}
+                        </Text>
+                        <Text lineHeight="18px" pt="10px" fontSize="12px">
+                            {'nft address '}
                             <a href={`https://testnet.wavesexplorer.com/assets/${coupon.assetId}/`} target="_blank" rel="noreferrer">{shortAddress(coupon.assetId)}</a>
                         </Text>
                         <Text lineHeight="18px" pt="10px" fontSize="12px">
-                            {'supplier: '}
+                            {'supplier '}
                             <a href={`https://testnet.wavesexplorer.com/address/${coupon.supplier}/`} target="_blank" rel="noreferrer">
                                 {coupon.supplierData?.name || shortAddress(coupon.supplier)}
                             </a>
                         </Text>
                         <Text lineHeight="18px" pt="10px" fontSize="12px">
-                            {'status: '}
+                            {'status '}
                             <Badge text={coupon.couponStatus} type={colorStatus(coupon.couponStatus)} p={0} />
                         </Text>
                         </>

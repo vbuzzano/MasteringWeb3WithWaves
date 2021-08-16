@@ -15,6 +15,7 @@ const PageSupplier = ({
 }) => {
     const {
         CouponDialogs,
+        // eslint-disable-next-line no-unused-vars
         form: [formOpened, onFormOpen],
     } = useCouponDialogs()
 
@@ -37,7 +38,7 @@ const PageSupplier = ({
                     <>
                     {activeUrl.match(new RegExp('.*/?(#supplier[^/]*|#supplier/manage.*)$')) ? (
                         <>
-                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary" role="alert">
+                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary small" role="alert">
                             <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -65,7 +66,7 @@ const PageSupplier = ({
 
                     {activeUrl.match(new RegExp('.*/?#supplier/approve.*$')) ? (
                         <>
-                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary" role="alert">
+                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary small" role="alert">
                             <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -88,7 +89,7 @@ const PageSupplier = ({
                     {activeUrl.match(new RegExp('.*/?#supplier/withdraw.*$')) ? (
                         <>
                         <BalancePanel account={account} />
-                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary" role="alert">
+                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary small" role="alert">
                             <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -109,7 +110,7 @@ const PageSupplier = ({
 
                     {activeUrl.match(new RegExp('.*/?#supplier/burn.*$')) ? (
                         <>
-                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary" role="alert">
+                        <Box className="alert alert-light alert-dismissible fade show text-center text-secondary small" role="alert">
                             <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>

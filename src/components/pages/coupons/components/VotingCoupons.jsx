@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react'
 
-import { CouponsList } from '../../../../containers'
+import { VotingList } from '../../../../containers'
 import {
-    DATA, fetchUserUsedCoupons, subscribe,
+    DATA, fetchUserCoupons, subscribe,
 } from '../../../../libs/dApp'
 import { Loading } from '../../../shared'
+
+const filter = e => e.voting
+
+const group = (gl, e) => {
+    if (!gl[e.item.id]) gl[e.item.id] = []
+    gl[e.item.id].push(e)
+    return gl
+}
 
 const UsedCoupons = ({ account, setActiveUrl }) => {
     const [loadingData, setLoadingData] = useState(true)
@@ -15,7 +23,14 @@ const UsedCoupons = ({ account, setActiveUrl }) => {
         async function refreshData() {
             setLoadingData(true)
             try {
-                const list = await fetchUserUsedCoupons(address)
+                const grouped = (await fetchUserCoupons(address)).filter(filter).reduce(group, {})
+                const list = Object.keys(grouped).map((e) => {
+                    const p = grouped[e][0]
+                    return {
+                        voting: p.voting,
+                        ...p.item,
+                    }
+                })
                 console.debug('[ 🔄 Used Coupons ] :', `${list.length} coupons loaded`)
                 updateItems(list)
             } catch (error) {
@@ -31,7 +46,7 @@ const UsedCoupons = ({ account, setActiveUrl }) => {
     return (
         <>
             {loadingData ? (<Loading />) : null }
-            <CouponsList
+            <VotingList
                 setActiveUrl={setActiveUrl}
                 items={items}
                 mode="used"
