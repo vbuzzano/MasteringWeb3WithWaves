@@ -1,3 +1,7 @@
+# Demo
+
+https://vbuzzano-couponbazaar.herokuapp.com/
+
 # Mastering Web 3 Course
 
 This repository contains all the needed UI elements to assemble Coupon Bazaar marketplace.
