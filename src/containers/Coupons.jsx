@@ -28,7 +28,7 @@ const Coupons = ({
             {!isManager && items.length === 0 && !hideEmptyListMessage ? (
                 <div className="alert alert-dark text-center">
                     No coupons yet, go to &nbsp;
-                    <a className="btn btn-primary" href="#market" onClick={() => setActiveUrl('#market')}>Market</a>
+                    <a className="btn btn-primary" href="#featured" onClick={() => setActiveUrl('#featured')}>Market</a>
                     &nbsp; to buy coupons
                 </div>
             ) : null }

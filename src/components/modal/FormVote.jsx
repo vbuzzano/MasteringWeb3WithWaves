@@ -78,10 +78,11 @@ const FormVote = ({
                             className="custom-select"
                             forwardRef={register({ required: true })}
                             error={errors.vote}
+                            defaultValue={item.isFeatured ? 'delisted' : 'featured'}
 
                         >
-                            <option value="featured" selected={!item?.isFeatured}>Add to featured list</option>
-                            <option value="delisted" selected={item?.isFeatured}>Remove from featured list</option>
+                            <option value="featured">Add to featured list</option>
+                            <option value="delisted">Remove from featured list</option>
                         </Controls.Input>
                     </div>
                     <div className="card-text">

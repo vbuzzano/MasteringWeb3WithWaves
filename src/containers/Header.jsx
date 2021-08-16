@@ -31,10 +31,10 @@ const initActiveUrl = (setActiveUrl) => {
         if (pos > 0) {
             setActiveUrl(href.substr(pos))
         } else {
-            setActiveUrl('#market')
+            setActiveUrl('#featured')
         }
     } else {
-        setActiveUrl('#market')
+        setActiveUrl('#featured')
     }
 }
 
