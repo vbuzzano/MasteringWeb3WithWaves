@@ -4,14 +4,12 @@
  * To run this test, you will need 2.017 Waves.
  *
  * get it here: https://stagenet.wavesexplorer.com/faucet
- *
+ * 
  * @author: vincent/code28
- *
  */
 
-const { exchange } = require('@waves/waves-transactions')
-
-// STAGENET MATCHER PUBLIC KEY
+// uncomment to use with surfboard
+// const { exchange } = require('@waves/waves-transactions')
 
 const expireLapsTime = 5; // 5 seconds
 let assetId = null;

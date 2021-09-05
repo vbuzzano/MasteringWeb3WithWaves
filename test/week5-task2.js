@@ -6,7 +6,6 @@
  * get it here: https://stagenet.wavesexplorer.com/faucet
  *
  * @author: vincent/code28
- *
  */
 
 let assetId = null;
