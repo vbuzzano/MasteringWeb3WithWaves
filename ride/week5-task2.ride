@@ -1,0 +1,25 @@
+{-# STDLIB_VERSION 3 #-}
+{-# CONTENT_TYPE DAPP #-}
+{-# SCRIPT_TYPE ACCOUNT #-}
+
+let ASSETID = "FtWS1WZYSnnZ7r3wVkd2M4wmPkUmV3bZQ9xfKtymEZhT"
+
+func saveCallerAddress(address: String) = WriteSet([
+  DataEntry("caller_address_" + address, address)
+])
+
+@Callable(i)
+func deposit() = {
+    let pmt = extract(i.payment)
+    let amount = pmt.amount
+    let assetId = match pmt.assetId {
+      case v: ByteVector => toBase58String(v)
+      case _ => ""
+    }
+    if (assetId != ASSETID) then throw("Only asset " + ASSETID + " is accepted")
+    else if (amount <= 0) then throw("Only positive amounts are accepted")
+    else saveCallerAddress(assetId)
+}
+
+@Verifier(tx)
+func verify() = false
